@@ -40,13 +40,13 @@ $readonly_users = array(
 $directories_users = array();
 
 // Enable highlight.js (https://highlightjs.org/) on view's page
-$use_highlightjs = true;
+$use_highlightjs = false;
 
 // highlight.js style
 $highlightjs_style = 'vs';
 
 // Enable ace.js (https://ace.c9.io/) on view's page
-$edit_files = true;
+$edit_files = false;
 
 // Default timezone for date() and time()
 // Doc - http://php.net/manual/en/timezones.php
@@ -58,7 +58,7 @@ $root_path = $_SERVER['DOCUMENT_ROOT'].'/images';
 
 // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
 // Will not working if $root_path will be outside of server document root
-$root_url = '/images';
+$root_url = 'img/';
 
 // Server hostname. Can set manually if wrong
 $http_host = $_SERVER['HTTP_HOST'];
@@ -72,16 +72,16 @@ $datetime_format = 'd/m/Y H:i';
 
 // Allowed file extensions for create and rename files
 // e.g. 'txt,html,css,js'
-$allowed_file_extensions = 'txt,md';
+$allowed_file_extensions = 'gif,jfif,jpg,jpeg,png,webp';
 
 // Allowed file extensions for upload files
 // e.g. 'gif,png,jpg,html,txt'
-$allowed_upload_extensions = 'jpg,png,gif,jfif,webp';
+$allowed_upload_extensions = 'gif,jfif,jpg,jpeg,png,webp';
 
 // Favicon path. This can be either a full url to an .PNG image, or a path based on the document root.
 // full path, e.g http://example.com/favicon.png
 // local path, e.g images/icons/favicon.png
-$favicon_path = 'images/internal/charte/geotribu_logo_64x64.png';
+$favicon_path = 'images/internal/charte/old_geotribu_logo_small.png';
 
 // Files and folders to excluded from listing
 // e.g. array('myfile.html', 'personal-folder', '*.php', ...)
