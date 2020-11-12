@@ -1,4 +1,4 @@
-# CDN minimliste de Geotribu
+# CDN minimaliste de Geotribu
 
 Fichiers de configuration pour <https://cdn.geotribu.fr>.
 
