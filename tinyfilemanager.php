@@ -433,8 +433,12 @@ if (isset($_POST['ajax']) && !FM_READONLY) {
         
         $writedata = $_POST['content'];
         $fd = fopen($file_path, "w");
-        @fwrite($fd, $writedata);
+        $write_results = @fwrite($fd, $writedata);
         fclose($fd);
+        if ($write_results === false){ 
+            header("HTTP/1.1 500 Internal Server Error");
+            die("Could Not Write File! - Check Permissions / Ownership");
+        }
         die(true);
     }
 
@@ -447,17 +451,27 @@ if (isset($_POST['ajax']) && !FM_READONLY) {
     }
     
     // backup files
-    if (isset($_POST['type']) && $_POST['type'] == "backup") {
-        $file = $_POST['file'];
-        $dir = fm_clean_path($_POST['path']);
-        $path = FM_ROOT_PATH.'/'.$dir;
-        if($dir) {
-            $date = date("dMy-His");
-            $newFile = $file . '-' . $date . '.bak';
-            copy($path . '/' . $file, $path . '/' . $newFile) or die("Unable to backup");
-            echo "Backup $newFile Created";
-        } else {
-            echo "Error! Not allowed";
+    if (isset($_POST['type']) && $_POST['type'] == "backup" && !empty($_POST['file'])) {
+        $fileName = $_POST['file'];
+        $fullPath = FM_ROOT_PATH . '/';
+        if (!empty($_POST['path'])) {
+            $relativeDirPath = fm_clean_path($_POST['path']);
+            $fullPath .= "{$relativeDirPath}/";
+        }
+        $date = date("dMy-His");
+        $newFileName = "{$fileName}-{$date}.bak";
+        $fullyQualifiedFileName = $fullPath . $fileName;
+        try {
+            if (!file_exists($fullyQualifiedFileName)) {
+                throw new Exception("File {$fileName} not found");
+            }
+            if (copy($fullyQualifiedFileName, $fullPath . $newFileName)) {
+                echo "Backup {$newFileName} created";
+            } else {
+                throw new Exception("Could not copy file {$fileName}");
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage();
         }
     }
 
@@ -1896,7 +1910,16 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
             foreach ($folders as $f) {
                 $is_link = is_link($path . '/' . $f);
                 $img = $is_link ? 'icon-link_folder' : 'fa fa-folder-o';
-                $modif = date(FM_DATETIME_FORMAT, filemtime($path . '/' . $f));
+                $modif_raw = filemtime($path . '/' . $f);
+                $modif = date(FM_DATETIME_FORMAT, $modif_raw);
+                if ($calc_folder) {
+                    $filesize_raw = fm_get_directorysize($path . '/' . $f);
+                    $filesize = fm_get_filesize($filesize_raw);
+                }
+                else {
+                    $filesize_raw = "";
+                    $filesize = lng('Folder');
+                }
                 $perms = substr(decoct(fileperms($path . '/' . $f)), -4);
                 if (function_exists('posix_getpwuid') && function_exists('posix_getgrgid')) {
                     $owner = posix_getpwuid(fileowner($path . '/' . $f));
@@ -1918,8 +1941,10 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                         <div class="filename"><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win(fm_enc($f)) ?>
                             </a><?php echo($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?></div>
                     </td>
-                    <td><?php if ($calc_folder) { echo fm_get_directorysize($path . '/' . $f); } else { echo lng('Folder'); } ?></td>
-                    <td><?php echo $modif ?></td>
+                    <td data-sort="a-<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT);?>">
+                        <?php echo $filesize; ?>
+                    </td>
+                    <td data-sort="a-<?php echo $modif_raw;?>"><?php echo $modif ?></td>                                                                                                                           
                     <?php if (!FM_IS_WIN && !$hide_Cols): ?>
                         <td><?php if (!FM_READONLY): ?><a title="Change Permissions" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?>
                         </td>
@@ -1941,7 +1966,8 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
             foreach ($files as $f) {
                 $is_link = is_link($path . '/' . $f);
                 $img = $is_link ? 'fa fa-file-text-o' : fm_get_file_icon_class($path . '/' . $f);
-                $modif = date(FM_DATETIME_FORMAT, filemtime($path . '/' . $f));
+                $modif_raw = filemtime($path . '/' . $f);
+                $modif = date(FM_DATETIME_FORMAT, $modif_raw);
                 $filesize_raw = fm_get_size($path . '/' . $f);
                 $filesize = fm_get_filesize($filesize_raw);
                 $filelink = '?p=' . urlencode(FM_PATH) . '&amp;view=' . urlencode($f);
@@ -1977,10 +2003,10 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                                 <?php echo($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?>
                         </div>
                     </td>
-                    <td><span title="<?php printf('%s bytes', $filesize_raw) ?>">
+                    <td data-sort=b-"<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT); ?>"><span title="<?php printf('%s bytes', $filesize_raw) ?>">
                         <?php echo $filesize; ?>
                         </span></td>
-                    <td><?php echo $modif ?></td>
+                    <td data-sort="b-<?php echo $modif_raw;?>"><?php echo $modif ?></td>
                     <?php if (!FM_IS_WIN && !$hide_Cols): ?>
                         <td><?php if (!FM_READONLY): ?><a title="<?php echo 'Change Permissions' ?>" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?>
                         </td>
@@ -2438,6 +2464,7 @@ function fm_get_size($file)
  */
 function fm_get_filesize($size)
 {
+    $size = (float) $size;
     $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
     $power = $size > 0 ? floor(log($size, 1024)) : 0;
     return sprintf('%s %s', round($size / pow(1024, $power), 2), $units[$power]);
@@ -2446,7 +2473,7 @@ function fm_get_filesize($size)
 /**
  * Get director total size
  * @param string $directory
- * @return string
+ * @return int
  */
 function fm_get_directorysize($directory) {
     global $calc_folder;
@@ -2459,7 +2486,7 @@ function fm_get_directorysize($directory) {
         }
     else if ($file->isDir()) { $dirCount++; }
     // return [$size, $count, $dirCount];
-    return fm_get_filesize($size);
+    return $size;
     }
     else return 'Folder'; //  Quick output
 }
@@ -3741,7 +3768,8 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
                     contentType: "multipart/form-data-encoded; charset=utf-8",
                     //dataType: "json",
                     success: function(mes){toast("Saved Successfully"); window.onbeforeunload = function() {return}},
-                    failure: function(mes) {toast("Error: try again");}
+                    failure: function(mes) {toast("Error: try again");},
+                    error: function(mes) {toast(`<p style="background-color:red">${mes.responseText}</p>`);}
                 });
                 
             }
@@ -3883,6 +3911,8 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
             if(_data && _data.aceMode) { $modeEl.html(optionNode("ace/mode/", _data.aceMode)); }
             if(_data && _data.aceTheme) { var lightTheme = optionNode("ace/theme/", _data.aceTheme.bright), darkTheme = optionNode("ace/theme/", _data.aceTheme.dark); $themeEl.html("<optgroup label=\"Bright\">"+lightTheme+"</optgroup><optgroup label=\"Dark\">"+darkTheme+"</optgroup>");}
             if(_data && _data.fontSize) { $fontSizeEl.html(optionNode("", _data.fontSize)); }
+            $modeEl.val( editor.getSession().$modeId );
+            $themeEl.val( editor.getTheme() );
             $fontSizeEl.val(12).change(); //set default font size in drop down
         }
 
