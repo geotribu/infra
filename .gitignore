@@ -49,3 +49,7 @@
 /web.config
 
 online/
+
+# configuration
+*.env
+!template.env
