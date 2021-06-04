@@ -28,7 +28,7 @@ Fichiers de configuration pour <https://cdn.geotribu.fr> et du mécanisme de sau
 
     ```bash
     sudo chown -R geotribu:www-data /var/www/geotribu/cdn/
-    sudo chmod 770 /var/www/geotribu/cdn/
+    sudo chmod -R 770 /var/www/geotribu/cdn/
     ```
 
 :warning: La base de données des commentaires étant stockée dans l'arborescence, il s'agit de s'assurer que les droits sont bien adaptés. Voir : <https://github.com/geotribu/comments>.
