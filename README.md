@@ -1,5 +1,7 @@
 # CDN minimaliste de Geotribu
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/minimalist-cdn/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/minimalist-cdn/master)
+
 Fichiers de configuration pour <https://cdn.geotribu.fr> et du mécanisme de sauvegarde, basé sur GitHub Release.
 
 ## Déploiement
