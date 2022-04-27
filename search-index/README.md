@@ -45,6 +45,10 @@ nano images-indexer.ini
 
 ## Utilisation
 
+### Indexation
+
+Le script `search_indexer.py` génère le fichier d'index.
+
 Tester l'indexation depuis le serveur :
 
 ```bash
@@ -55,3 +59,9 @@ source .venv/bin/activate
 # indexer les images
 python -d search_indexer.py
 ```
+
+Le fichier d'index est ensuite accessible publiquement : <https://cdn.geotribu.fr/img/search-index.json>.
+
+### Recherche
+
+Le script `search_playground.py` permet de faire une recherche en utilisant l'index.
