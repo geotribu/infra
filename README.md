@@ -8,6 +8,21 @@ Fichiers de configuration pour <https://cdn.geotribu.fr> et du mécanisme de sau
 
 > OS serveur : Ubuntu Server 18.04
 
+### Prérequis
+
+- Accès SSH au serveur
+
+Exemple de configuration SSH :
+
+```config
+IdentitiesOnly yes
+
+Host geotribu
+    HostName elgeopaso.georezo.net
+    User geotribu
+    IdentityFile ~/.ssh/id_rsa_elgeopaso
+```
+
 ### Tiny File Manager
 
 1. Installer les dépendances
@@ -99,6 +114,14 @@ A la fin du script de sauvegarde, un message d'information est envoyé sur le Sl
 
 - interface de gestion de l'application Geotribot : <https://api.slack.com/apps/A020C9Q93BK>
 - interface de conception du message : <https://app.slack.com/block-kit-builder/TUKTSG55K>
+
+----
+
+### Indexation des fichiers du CDN
+
+Afin de faciliter la recherche de la bonne image lors de la rédaction des contenus, un index des fichiers du CDN est réalisé avec [lunr](https://lunrjs.com/) (son implémentation Python).
+
+Voir [le README du sous-dossier dédié](search-index/README.md).
 
 ----
 
