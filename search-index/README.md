@@ -55,5 +55,3 @@ source .venv/bin/activate
 # indexer les images
 python -d search_indexer.py
 ```
-
-

@@ -77,4 +77,6 @@ output_filepath: Path = start_folder / "search-index.json"
 with output_filepath.open(mode="w") as fd:
     json.dump(serialized_idx, fd)
 
-logging.info(f"Index created: {output_filepath}.\n\tSize: {output_filepath.stat().st_size}")
+logging.info(
+    f"Index created: {output_filepath}.\n\tSize: {output_filepath.stat().st_size}"
+)
