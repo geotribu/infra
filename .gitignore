@@ -50,6 +50,13 @@
 
 online/
 
+# Python
+.venv
+
 # configuration
 *.env
 !template.env
+
+# fixtures
+images-idx.json
+config-sample.php
