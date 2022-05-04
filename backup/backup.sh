@@ -36,7 +36,7 @@ git pull --ff-only --tags
 # disable GitHub CLI prompts
 gh config set prompt disabled
 # Create release
-gh release create "$_tomonth" "$HOME"/backups/cdn/bkp_cdn_"${_today}".tar.gz --title "Sauvegarde $_tomonth"
+gh release create "$_tomonth" "$HOME"/backups/cdn/bkp_cdn_"${_today}".tar.gz --title "Sauvegarde $_tomonth" --generate-notes
 
 
 # -- Slack Notification
