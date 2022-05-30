@@ -19,23 +19,16 @@ $use_auth = true;
 // Users: array('Username' => 'Password', 'Username2' => 'Password2', ...)
 // Generate secure password hash - https://tinyfilemanager.github.io/docs/pwd.html
 $auth_users = array(
-    // REMPLIR AVEC LES IDENTIFIANTS ET MOTS DE PASSE
+    'geotribuadm' => '$2y$10$kCxH/a2pJZajFC9ZS1KczuWBsr4/f8RQS85c0WCpi/4eh/DRkiyEC',
+    'contributeur' => '$2y$10$cF3zQwyhZn8Rd0QoFzwvXeetCObAczYxk4urNjIjbYMCU09eQU9Di',
+    'invité' => '$2y$10$w4D2KtWBez/Dqubz4FTgpeoPcKOIdpl76kr03U5IXbZtL6pqLqZRS',
 );
 
-// user specific directories
-// array('Username' => 'Directory path', 'Username2' => 'Directory path', ...)
-$directories_users = array();
-
-//set application theme
-//options - 'light' and 'dark'
-$theme = 'light';
-
-// Readonly users 
+// Readonly users
 // e.g. array('users', 'guest', ...)
 $readonly_users = array(
     'invité'
 );
-
 
 // Enable highlight.js (https://highlightjs.org/) on view's page
 $use_highlightjs = false;
@@ -62,12 +55,16 @@ $root_url = 'img/';
 // Server hostname. Can set manually if wrong
 $http_host = $_SERVER['HTTP_HOST'];
 
+// user specific directories
+// array('Username' => 'Directory path', 'Username2' => 'Directory path', ...)
+$directories_users = array();
+
 // input encoding for iconv
 $iconv_input_encoding = 'UTF-8';
 
 // date() format for file modification date
 // Doc - https://www.php.net/manual/en/function.date.php
-$datetime_format = 'd/m/Y H:i';
+$datetime_format = 'd/m/Y H:i:s';
 
 // Allowed file extensions for create and rename files
 // e.g. 'txt,html,css,js'
@@ -103,7 +100,7 @@ $sticky_navbar = true;
 
 
 // max upload file size
-$max_upload_size_bytes = 2048;
+$max_upload_size_bytes = 5000;
 
 // Possible rules are 'OFF', 'AND' or 'OR'
 // OFF => Don't check connection IP, defaults to OFF
