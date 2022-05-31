@@ -1,0 +1,6 @@
+{
+    "python.formatting.provider": "black",
+    "git.enableCommitSigning": true,
+    "editor.formatOnSave": true,
+    "autoDocstring.docstringFormat": "one-line-sphinx"
+}
