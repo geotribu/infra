@@ -1,0 +1,5 @@
+setuptools
+wheel
+
+-r images_uploader/requirements.txt
+-r search-index/requirements.txt
