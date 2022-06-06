@@ -59,6 +59,13 @@ Ajouter `image/webp             webp` à la suite des formats d'images.
 
 #### HTTP/2
 
+Tester :
+
+```bash
+> curl -I --http2 -s https://cdn.geotribu.fr/ | grep HTTP
+HTTP/2 200
+```
+
 Ressources :
 
 - documentation Apache : <https://httpd.apache.org/docs/2.4/howto/http2.html>
