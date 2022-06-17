@@ -35,6 +35,20 @@ python -m pip install -U setuptools wheel
 python -m pip install -U -r requirements.txt
 ```
 
+### Planification
+
+Editer les tâches cron :
+
+```sh
+crontab -e
+```
+
+Ajouter la tâche :
+
+```cron
+@hourly cd /home/geotribu/scripts/cdn-search-index && /home/geotribu/scripts/cdn-search-index/.venv/bin/python /home/geotribu/scripts/cdn-search-index/search_indexer.py  > /home/geotribu/scripts/cdn-search-index/`date +\%Y\%m\%d\%H\%M\%S`-cron.log 2>&
+```
+
 ## Configuration
 
 Eventuellement, modifier le fichier `images-indexer.ini` pour configurer les paramètres de l'indexation :
