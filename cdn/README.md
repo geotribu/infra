@@ -11,9 +11,10 @@ L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
     ```bash
     # mise à jour de la liste des paquets
     sudo apt update
-    # ajout du PPA pour avoir les dernières versions
+    # ajout du PPA pour avoir les dernières versions de PHP et d'Apache
     sudo apt install software-properties-common
     sudo add-apt-repository ppa:ondrej/php
+    sudo add-apt-repository ppa:ondrej/apache2
 
     # installation de PHP et de ses dépendances
     sudo apt install php8.1 php8.1-common php8.1-fileinfo php8.1-fpm php8.1-iconv php8.1-mbstring php8.1-zip
