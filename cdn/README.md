@@ -16,6 +16,9 @@ L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
     sudo add-apt-repository ppa:ondrej/php
     sudo add-apt-repository ppa:ondrej/apache2
 
+    # Installation d'Apache et des dépendances
+    sudo apt install apache2 apache2-dev brotli
+
     # installation de PHP et de ses dépendances
     sudo apt install php8.1 php8.1-common php8.1-fileinfo php8.1-fpm php8.1-iconv php8.1-mbstring php8.1-zip
     ```
