@@ -11,8 +11,9 @@ L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
     ```bash
     # mise à jour de la liste des paquets
     sudo apt update
-    # ajout du PPA pour avoir les dernières versions de PHP et d'Apache
+    # ajout des PPA pour avoir les dernières versions de Git, PHP et d'Apache
     sudo apt install software-properties-common
+    sudo add-apt-repository ppa:git-core/ppa
     sudo add-apt-repository ppa:ondrej/php
     sudo add-apt-repository ppa:ondrej/apache2
 
