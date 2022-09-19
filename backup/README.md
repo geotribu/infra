@@ -6,18 +6,10 @@
 
 L'outil en ligne de commande de GitHub est utilisé pour créer des releases et téléverser les sauvegardes des fichiers statiques.
 
+1. Installer GitHUB CLI : <https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt>
+2. Cloner le dépôt du site :
+
 ```bash
-# dépendances
-sudo apt install dirmngr
-
-# ajout de la clé et du dépôt
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-sudo apt-add-repository https://cli.github.com/packages
-
-# installation
-sudo apt update
-sudo apt install gh
-
 # clonage du dépôt du site
 cd /var/www/geotribu/
 git clone https://github.com/geotribu/website.git --depth=1
