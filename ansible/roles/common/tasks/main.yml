@@ -1,0 +1,22 @@
+---
+- name: Ajoute le dépôt de Git
+  ansible.builtin.apt_repository:
+    repo: "ppa:git-core/ppa"
+
+- name: Installe les paquets de base
+  become: true
+  ansible.builtin.apt:
+    name:
+      - fail2ban
+      - ntp
+      - curl
+      - apt-transport-https
+      - git
+      - lsb-release
+      - python3-pip
+      - python3-setuptools
+
+- name: Upgrade pip3
+  ansible.builtin.pip:
+    name: pip
+    executable: pip3

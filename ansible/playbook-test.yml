@@ -1,0 +1,8 @@
+- name: Playbook de test
+  hosts: elgeopaso2204
+  tasks:
+    - name: "Ping l'hôte"
+      ansible.builtin.ping:
+    - name: "Affiche le message de salutation"
+      ansible.builtin.debug:
+        msg: Salut le serveur de GeoRezo

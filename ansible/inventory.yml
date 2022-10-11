@@ -1,0 +1,12 @@
+georezo:
+  hosts:
+    elgeopaso1804:
+      ansible_host: geotribu
+      ansible_user: geotribu
+
+    elgeopaso2204:
+      ansible_host: geotribu2
+      ansible_user: geotribu
+  vars:
+    http_port: 80
+    https_port: 443

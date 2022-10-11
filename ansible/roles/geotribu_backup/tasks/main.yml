@@ -1,0 +1,46 @@
+---
+- name: Ajoute le dépôt PPA à jour pour PHP
+  ansible.builtin.apt_repository:
+    repo: "ppa:ondrej/php"
+
+- name: Ajoute le dépôt PPA à jour pour Apache
+  ansible.builtin.apt_repository:
+    repo: "ppa:ondrej/apache2"
+
+- name: Installation des paquets liés à Apache
+  become: true
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - brotli
+    update_cache: yes
+
+- name: Installation des paquets liés à PHP
+  become: true
+  ansible.builtin.apt:
+    name:
+      - php8.1
+      - php8.1-common
+      - php8.1-fileinfo
+      - php8.1-fpm
+      - php8.1-iconv
+      - php8.1-mbstring
+      - php8.1-zip
+    update_cache: yes
+# - name: "UFW firewall allow HTTP on port {{ http_port }}"
+#   become: true
+#   community.general.ufw:
+#     comment: rule set by Geotribu Ansible playbook
+#     rule: allow
+#     port: "{{ http_port }}"
+#     proto: tcp
+#     state: enabled
+
+# - name: "UFW firewall allow HTTPS on port {{ https_port }}"
+#   become: true
+#   community.general.ufw:
+#     comment: rule set by Geotribu Ansible playbook
+#     rule: allow
+#     port: "{{ https_port }}"
+#     proto: tcp
+#     state: enabled

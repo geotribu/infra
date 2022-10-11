@@ -1,0 +1,10 @@
+---
+# if all tasks are successfull
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted
+
+- name: Reload ufw
+  ufw:
+    state: reloaded
