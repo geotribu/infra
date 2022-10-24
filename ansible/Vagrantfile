@@ -1,0 +1,47 @@
+Vagrant.require_version ">= 1.8.0"
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.define "geotributest"
+  # Allow hosts to reach this vm by hostname
+  # Note: libnss-mdns must be installed on host
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.hostname = 'geotribu.local'
+
+  config.vm.network "private_network", type: "dhcp"
+  config.vm.provision "allow_guest_host_resolution",
+    type: "shell",
+    inline: 'apt-get install -y avahi-daemon libnss-mdns'
+
+
+
+  # Disable the new default behavior introduced in Vagrant 1.7, to
+  # ensure that all Vagrant machines will use the same SSH key pair.
+  # See https://github.com/mitchellh/vagrant/issues/5005
+  config.ssh.insert_key = false
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.host_key_checking = false
+    ansible.limit          = "geotributest"
+    # ansible.inventory_path = "inventory.yml"
+    ansible.playbook = "playbook.yml"
+    ansible.verbose = 'v'
+    ansible.extra_vars = {
+      http_port: 80,
+      https_port: 443,
+      hostname: config.vm.hostname
+    }
+
+  end
+
+end

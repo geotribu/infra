@@ -1,12 +1,18 @@
 georezo:
   hosts:
-    elgeopaso1804:
-      ansible_host: geotribu
-      ansible_user: geotribu
+    # elgeopaso1804:
+    #   ansible_host: geotribu
+    #   ansible_user: geotribu
 
     elgeopaso2204:
       ansible_host: geotribu2
       ansible_user: geotribu
+
+    geotributest:
+      ansible_host: geotribu.local
+      ansible_user: vagrant
+      # ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
+
   vars:
     http_port: 80
     https_port: 443

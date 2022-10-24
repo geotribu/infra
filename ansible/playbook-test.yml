@@ -1,8 +1,13 @@
 - name: Playbook de test
-  hosts: elgeopaso2204
+  hosts: all
+  gather_facts: yes
+
   tasks:
     - name: "Ping l'hôte"
       ansible.builtin.ping:
     - name: "Affiche le message de salutation"
       ansible.builtin.debug:
         msg: Salut le serveur de GeoRezo
+    - name: "Affiche info réseau"
+      ansible.builtin.debug:
+        msg: "{{ ansible_hostname }}:{{ ansible_default_ipv4.address }}"

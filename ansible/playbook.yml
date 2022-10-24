@@ -1,5 +1,5 @@
 - name: Déploiement de la stack El Geo Paso et Geotribu
-  hosts: elgeopaso2204
+  hosts: all
   roles:
     - role: common
     - role: geotribu_cdn
