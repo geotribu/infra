@@ -1,0 +1,5 @@
+---
+# if all tasks are successfull
+- name: Reload ufw
+  ufw:
+    state: reloaded

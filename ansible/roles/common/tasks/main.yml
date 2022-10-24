@@ -1,9 +1,10 @@
 ---
 - name: Ajoute le dépôt de Git
+  become: true
   ansible.builtin.apt_repository:
     repo: "ppa:git-core/ppa"
 
-- name: Installe les paquets de base
+- name: "Installe les paquets de base"
   become: true
   ansible.builtin.apt:
     name:
@@ -16,7 +17,51 @@
       - python3-pip
       - python3-setuptools
 
-- name: Upgrade pip3
+- name: "Met à jour pip"
   ansible.builtin.pip:
     name: pip
     executable: pip3
+
+- name: "S'assure que le groupe 'geoadmins' existe"
+  become: true
+  ansible.builtin.group:
+    name: geoadmins
+    state: present
+
+- name: "S'assure que le groupe 'geocontributors' existe"
+  become: true
+  ansible.builtin.group:
+    name: geocontributors
+    state: present
+
+- name: "Ajoute l'utilisateur 'geotribu' with a bash shell, appending the group 'admins' and 'contributors' and 'www-data' to the user's groups"
+  become: true
+  ansible.builtin.user:
+    name: geotribu
+    shell: /bin/bash
+    groups: geoadmins, geocontributors
+    append: yes
+
+- name: ufw allow ssh
+  become: true
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: "UFW firewall allow HTTP on port {{ http_port }}"
+  become: true
+  community.general.ufw:
+    comment: rule set by Geotribu Ansible playbook
+    rule: allow
+    port: "{{ http_port }}"
+    proto: tcp
+    state: enabled
+
+- name: "UFW firewall allow HTTPS on port {{ https_port }}"
+  become: true
+  community.general.ufw:
+    comment: rule set by Geotribu Ansible playbook
+    rule: allow
+    port: "{{ https_port }}"
+    proto: tcp
+    state: enabled
