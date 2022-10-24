@@ -1,9 +1,11 @@
 ---
 - name: Ajoute le dépôt PPA à jour pour PHP
+  become: true
   ansible.builtin.apt_repository:
     repo: "ppa:ondrej/php"
 
 - name: Ajoute le dépôt PPA à jour pour Apache
+  become: true
   ansible.builtin.apt_repository:
     repo: "ppa:ondrej/apache2"
 
@@ -14,6 +16,7 @@
       - apache2
       - brotli
     update_cache: yes
+    state: latest
 
 - name: Installation des paquets liés à PHP
   become: true
@@ -28,20 +31,88 @@
       - php8.1-zip
     update_cache: yes
 
-- name: "UFW firewall allow HTTP on port {{ http_port }}"
+# Apache modules
+- name: Active le module Apache - brotli
   become: true
-  community.general.ufw:
-    comment: rule set by Geotribu Ansible playbook
-    rule: allow
-    port: "{{ http_port }}"
-    proto: tcp
-    state: enabled
+  community.general.apache2_module:
+    state: present
+    name: brotli
 
-- name: "UFW firewall allow HTTPS on port {{ https_port }}"
+- name: Active le module Apache - headers
   become: true
-  community.general.ufw:
-    comment: rule set by Geotribu Ansible playbook
-    rule: allow
-    port: "{{ https_port }}"
-    proto: tcp
-    state: enabled
+  community.general.apache2_module:
+    state: present
+    name: headers
+
+- name: Active le module Apache - http2
+  become: true
+  community.general.apache2_module:
+    state: present
+    name: http2
+
+- name: Active le module Apache - proxy_fcgi
+  become: true
+  community.general.apache2_module:
+    state: present
+    name: proxy_fcgi
+
+- name: Active le module Apache - setenvif
+  become: true
+  community.general.apache2_module:
+    state: present
+    name: setenvif
+
+- name: Désactive le module Apache - mpm_worker
+  become: true
+  community.general.apache2_module:
+    state: absent
+    name: mpm_worker
+    ignore_configcheck: true
+
+- name: Désactive le module Apache - mpm_prefork
+  become: true
+  community.general.apache2_module:
+    state: absent
+    name: mpm_prefork
+    ignore_configcheck: true
+
+- name: Active la configuration pour php8 FPM
+  become: true
+  command: >
+    a2enconf php8.1-fpm
+  args:
+    creates: "/etc/apache2/conf-enabled/php8.1-fpm.conf"
+  when: item.state is not defined or item.state != 'absent'
+  notify: Restart Apache
+
+# Installe TinyFileManager
+- name: Crée le dossier de destination
+  become: true
+  file:
+    path: /var/www/geotribu/cdn/images/
+    state: directory
+
+- name: Copie les fichiers de TinyFileManager
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /var/www/geotribu/cdn/
+    owner: geotribu
+    group: www-data
+    mode: "0770"
+    backup: true
+  with_fileglob:
+    - "../cdn/config.php"
+    - "../cdn/tinyfilemanager.php"
+    - "../cdn/translation.json"
+
+- name: Copie la configuration Apache2 du CDN
+  become: true
+  ansible.builtin.copy:
+    src: "../cdn/apache_cdn.conf"
+    dest: "/etc/apache2/sites-available/geotribu-cdn.conf"
+
+- name: Active le site
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite geotribu-cdn"
+  notify: Restart Apache
