@@ -1,0 +1,13 @@
+---
+# if all tasks are successfull
+- name: Reload Apache
+  become: true
+  ansible.builtin.service:
+    name: apache2
+    state: reloaded
+
+- name: Restart Apache
+  become: true
+  ansible.builtin.service:
+    name: apache2
+    state: restarted

@@ -1,0 +1,75 @@
+---
+- name: Installation des paquets liés à Isso
+  become: true
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - apache2-dev # pour mod_wsgi
+      - build-essential
+      - python3-venv
+      - software-properties-common
+      - sqlite3
+    update_cache: yes
+    state: latest
+
+# Apache modules
+
+# Installe Isso
+- name: Crée le dossier de destination pour les commentaires (Isso)
+  become: true
+  file:
+    path: /var/www/geotribu/comments/
+    state: directory
+    owner: geotribu
+    group: www-data
+
+- name: Copie les fichiers nécessaire à Isso
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /var/www/geotribu/comments/
+    owner: geotribu
+    group: www-data
+    backup: true
+  with_fileglob:
+    - "../comments/isso-prod.cfg"
+    - "../comments/isso_wsgi.py"
+    - "../comments/requirements.txt"
+    - "../comments/webhook_template_slack.json"
+
+- name: Ensure virtualenv is configured and default packages updated
+  ansible.builtin.pip:
+    name:
+      - pip
+      - setuptools
+      - wheel
+    chdir: /var/www/geotribu/comments/
+    virtualenv: "/var/www/geotribu/comments/.venv"
+    virtualenv_command: /usr/bin/python3 -m venv
+  become: true
+
+- name: Installe les paquets Python pour Isso
+  ansible.builtin.pip:
+    chdir: /var/www/geotribu/comments/
+    requirements: requirements.txt
+    virtualenv: "/var/www/geotribu/comments/.venv"
+  become: true
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /var/www/geotribu/comments/
+    owner: geotribu
+    group: www-data
+    mode: "770"
+  become: true
+
+- name: Copie la configuration Apache2 pour les commentaires
+  become: true
+  ansible.builtin.copy:
+    src: "../comments/apache.vhost"
+    dest: "/etc/apache2/sites-available/geotribu-comments.conf"
+
+- name: Active le site
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite geotribu-comments"
+  notify: Restart Apache
