@@ -63,6 +63,19 @@ online/
 # Python
 .venv
 
+# isso
+*.db
+*.sqlite
+*.log
+node_modules
+package.json
+yarn.lock
+
+# Disqus export
+*.xml
+*.gz
+
+
 # configuration
 *.env
 !template.env

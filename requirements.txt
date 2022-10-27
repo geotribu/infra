@@ -1,5 +1,7 @@
 setuptools
 wheel
 
+-r ansible/requirements.txt
+-r comments/requirements.txt
 -r images_uploader/requirements.txt
 -r search-index/requirements.txt
