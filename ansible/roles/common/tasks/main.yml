@@ -17,6 +17,16 @@
       - python3-pip
       - python3-setuptools
 
+- name: MAJ les paquets installés
+  become: true
+  ansible.builtin.apt:
+    upgrade: yes
+
+- name: Nettoie les paquets inutilisés
+  become: true
+  ansible.builtin.apt:
+    autoremove: yes
+
 - name: "Met à jour pip"
   ansible.builtin.pip:
     name: pip
