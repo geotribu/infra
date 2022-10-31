@@ -1,3 +1,4 @@
 ---
 http_port: 80
 https_port: 443
+geotribu_www: geotribu

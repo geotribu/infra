@@ -32,49 +32,29 @@
     update_cache: yes
 
 # Apache modules
-- name: Active le module Apache - brotli
+- name: Désactive les module Apache
   become: true
   community.general.apache2_module:
-    state: present
-    name: brotli
-
-- name: Active le module Apache - headers
-  become: true
-  community.general.apache2_module:
-    state: present
-    name: headers
-
-- name: Active le module Apache - http2
-  become: true
-  community.general.apache2_module:
-    state: present
-    name: http2
-
-- name: Active le module Apache - proxy_fcgi
-  become: true
-  community.general.apache2_module:
-    state: present
-    name: proxy_fcgi
-
-- name: Active le module Apache - setenvif
-  become: true
-  community.general.apache2_module:
-    state: present
-    name: setenvif
-
-- name: Désactive le module Apache - mpm_worker
-  become: true
-  community.general.apache2_module:
+    name: "{{ item }}"
     state: absent
-    name: mpm_worker
     ignore_configcheck: true
+  loop:
+    - mpm_prefork
+    - mpm_worker
 
-- name: Désactive le module Apache - mpm_prefork
+- name: Active les modules Apache
   become: true
   community.general.apache2_module:
-    state: absent
-    name: mpm_prefork
+    name: "{{ item }}"
+    state: present
     ignore_configcheck: true
+  loop:
+    - brotli
+    - headers
+    - http2
+    - mpm_event
+    - proxy_fcgi
+    - setenvif
 
 - name: Active la configuration pour php8 FPM
   become: true
@@ -89,30 +69,35 @@
 - name: Crée le dossier de destination
   become: true
   file:
-    path: /var/www/geotribu/cdn/images/
+    path: "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images/"
     state: directory
 
 - name: Copie les fichiers de TinyFileManager
   become: true
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: /var/www/geotribu/cdn/
+    dest: "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/"
     owner: geotribu
     group: www-data
     mode: "0770"
     backup: true
   with_fileglob:
-    - "../cdn/config.php"
-    - "../cdn/tinyfilemanager.php"
-    - "../cdn/translation.json"
+    - "../{{ sub_hostname }}/config.php"
+    - "../{{ sub_hostname }}/tinyfilemanager.php"
+    - "../{{ sub_hostname }}/translation.json"
 
 - name: Copie la configuration Apache2 du CDN
   become: true
-  ansible.builtin.copy:
-    src: "../cdn/apache_cdn.conf"
-    dest: "/etc/apache2/sites-available/geotribu-cdn.conf"
+  ansible.builtin.template:
+    src: "templates/apache_cdn.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ sub_hostname }}.conf"
 
 - name: Active le site
   become: true
-  ansible.builtin.command: "/usr/sbin/a2ensite geotribu-cdn"
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ sub_hostname }}"
   notify: Restart Apache
+
+- name: Désactive le site par défaut d'Apache
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
+  notify: Reload Apache

@@ -1,0 +1,47 @@
+<VirtualHost *:{{ http_port }}>
+    ServerName {{ sub_hostname }}.{{ hostname }}
+    DocumentRoot /var/www/{{ geotribu_www }}/{{ sub_hostname }}/
+    Alias /img "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images/"
+    DirectoryIndex tinyfilemanager.php
+
+    # HTTP/2
+    <IfModule http2_module>
+        ProtocolsHonorOrder On
+        Protocols h2 h2c http/1.1
+    </IfModule>
+
+    <Directory "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images">
+        Options +FollowSymLinks -Indexes
+        Require method GET POST OPTIONS
+    </Directory>
+
+    # enable brotli
+    <If "%{HTTP_USER_AGENT} =~ m# (Edge/(1[5-9]|[2-9][0-9])\.[0-9]{5}|Firefox/[4-9][0-9]\.[0-9]|Chrome/[5-9][0-9]\.[0-9]\.[0-9]{4}\.[0-9]{3}|OPR/[3-9][0-9]\.[0-9]\.[0-9]{4}\.[0-9]{2}|Safari/(60[4-9]|[7-9][0-9]{2})\.[0-9](\.[0-9]{2})?)($| )#">
+        AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/javascript text/xml image/svg+xml
+        AddOutputFilterByType BROTLI_COMPRESS application/javascript application/xml application/xhtml+xml application/rss+xml
+    </If>
+    <Else>
+        AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript text/xml image/svg+xml
+        AddOutputFilterByType DEFLATE application/javascript application/xml application/xhtml+xml application/rss+xml
+    </Else>
+
+
+    # cache static files for 1 year
+    <FilesMatch "\.(ico|pdf|flv|jfif|jpg|jpeg|png|gif|js|css|webp)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+
+    # indique que certains headers peuvent varier
+    Header append Vary User-Agent
+    Header append Vary Accept-Encoding
+
+    # HSTS - forcer les connexions en https pendant 180 jours
+    Header always set Strict-Transport-Security "max-age=15552001; includeSubDomains;"
+    # enable HTTP/2, if available
+    Protocols h2 http/1.1
+
+    # log
+    ErrorLog ${APACHE_LOG}/{{ geotribu_www }}_{{ sub_hostname }}_error.log
+    LogLevel warn
+    CustomLog ${APACHE_LOG}/{{ geotribu_www }}_{{ sub_hostname }}_access.log combined
+</VirtualHost>
