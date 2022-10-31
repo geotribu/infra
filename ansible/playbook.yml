@@ -2,4 +2,7 @@
   hosts: all
   roles:
     - role: common
-    - role: geotribu_cdn
+    - role: cdn.geotribu.fr
+    - role: comments.geotribu.fr
+    - role: elgeopaso.georezo.net
+    - role: backup
