@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/jammy64"
-  config.vm.define "geotributest"
+  config.vm.define "vm_geotributest"
   # Allow hosts to reach this vm by hostname
   # Note: libnss-mdns must be installed on host
   # config.vm.network "forwarded_port", guest: 80, host: 8080
@@ -23,22 +23,21 @@ Vagrant.configure("2") do |config|
     type: "shell",
     inline: 'apt-get install -y avahi-daemon libnss-mdns'
 
-
-
   # Disable the new default behavior introduced in Vagrant 1.7, to
   # ensure that all Vagrant machines will use the same SSH key pair.
   # See https://github.com/mitchellh/vagrant/issues/5005
   config.ssh.insert_key = false
 
   config.vm.provision "ansible" do |ansible|
+    ansible.groups = {
+      "geotributest" => ["vm_geotributest"],
+    }
     ansible.host_key_checking = false
     ansible.limit          = "geotributest"
     # ansible.inventory_path = "inventory.yml"
     ansible.playbook = "playbook.yml"
     ansible.verbose = 'v'
     ansible.extra_vars = {
-      http_port: 80,
-      https_port: 443,
       hostname: config.vm.hostname
     }
 
