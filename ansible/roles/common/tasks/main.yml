@@ -49,7 +49,7 @@
   ansible.builtin.user:
     name: geotribu
     shell: /bin/bash
-    groups: geoadmins, geocontributors
+    groups: geoadmins, geocontributors, sudo
     append: yes
 
 - name: ufw allow ssh
