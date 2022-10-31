@@ -1,5 +1,5 @@
 # run Python in optimized mode
-WSGIPythonOptimize 2
+# WSGIPythonOptimize 2
 
 <VirtualHost *:80>
     ServerName comments.geotribu.fr
