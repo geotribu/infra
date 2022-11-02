@@ -1,4 +1,5 @@
 ---
+# Paquets logiciels
 - name: Ajoute le dépôt de Git
   become: true
   ansible.builtin.apt_repository:
@@ -16,22 +17,27 @@
       - lsb-release
       - python3-pip
       - python3-setuptools
+    update_cache: true
+    state: present
 
 - name: MAJ les paquets installés
   become: true
   ansible.builtin.apt:
-    upgrade: yes
+    update_cache: true
+    upgrade: true
+    cache_valid_time: 86400 # 1 jour
 
 - name: Nettoie les paquets inutilisés
   become: true
   ansible.builtin.apt:
-    autoremove: yes
+    autoremove: true
 
 - name: "Met à jour pip"
   ansible.builtin.pip:
     name: pip
     executable: pip3
 
+# Utilisateurs et groupes
 - name: "S'assure que le groupe 'geoadmins' existe"
   become: true
   ansible.builtin.group:
@@ -47,11 +53,13 @@
 - name: "Ajoute l'utilisateur 'geotribu' with a bash shell, appending the group 'admins' and 'contributors' and 'www-data' to the user's groups"
   become: true
   ansible.builtin.user:
+    append: true
+    createhome: true
     name: geotribu
     shell: /bin/bash
     groups: geoadmins, geocontributors, sudo
-    append: yes
 
+# Pare-feu
 - name: ufw allow ssh
   become: true
   community.general.ufw:
@@ -75,3 +83,8 @@
     port: "{{ https_port }}"
     proto: tcp
     state: enabled
+
+# Divers
+- name: Crée l'alias bash pour ll
+  ansible.builtin.shell: alias ll="ls -als"
+  become_user: geotribu
