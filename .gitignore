@@ -86,3 +86,7 @@ config-sample.php
 _tinified/
 *.log
 images_uploader/*.log.*
+
+### Ansible ###
+*.retry
+password_file
