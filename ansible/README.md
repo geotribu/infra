@@ -98,3 +98,43 @@ PLAY RECAP *********************************************************************
 elgeopaso1804              : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
 elgeopaso2204              : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
 ```
+
+### Lancer le playbook
+
+```sh
+ansible-playbook -i inventory.yml playbook.yml
+```
+
+### Gestion des secrets
+
+Les mots de passe et autres données sensibles sont chiffrées à l'aide de l'utilitaire [`ansible-vault`](https://docs.ansible.com/ansible/latest/user_guide/vault.html) via un mot de passe maître (voir avec l'admin de Geotribu).
+
+Il est possible de stocker le mot de passe maître à différents endroits :
+
+- dans un fichier `password_file` qui ne sera **jamais** envoyé ou ajouté à Git
+
+#### Créer un nouveau secret
+
+Pour ajouter un nouveau secret (mot de passe, token, etc.) qu'on appelle ici `mon_token_secret` :
+
+1. Exécuter : `ansible-vault encrypt_string --vault-id default@password_file --stdin-name 'mon_token_secret'`
+1. Entrer la valeur du secret dans le prompt qui s'ouvre (fermer avec `Ctrl` + `d`)
+1. Copier/coller le résultat dans le fichier de variables souhaité. Par exemple : `host_vars/elgeopaso2204.yml`
+
+#### Accèder à un secret
+
+Pour accéder à un mot de passe dans le vault :
+
+```sh
+ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_vars/elgeopaso2204.yml" --vault-password-file password_file
+```
+
+----
+
+## Développement local
+
+Il est possible d'utiliser une VM pour tester le déploiement sans risque :
+
+```sh
+vagrant up --provision
+```
