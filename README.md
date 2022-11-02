@@ -6,7 +6,7 @@ Fichiers de configuration pour <https://cdn.geotribu.fr> et des outils liés : s
 
 ## Déploiement
 
-- OS serveur à date : Ubuntu Server 18.04
+- OS serveur à date : Ubuntu Server 22.04
 
 ### Prérequis
 
@@ -16,10 +16,13 @@ Fichiers de configuration pour <https://cdn.geotribu.fr> et des outils liés : s
     IdentitiesOnly yes
 
     Host geotribu
-        HostName elgeopaso.georezo.net
+        HostName vps383.altinea.eu
         User geotribu
         IdentityFile ~/.ssh/id_rsa_elgeopaso
     ```
+
+- Ansible : voir [le README dédié](ansible/README.md)
+- Mot de passe maître pour les variables secrètes d'Ansible (voir le même README)
 
 ----
 
@@ -31,7 +34,7 @@ Voir [le README dédié](cdn/README.md).
 
 ### Sauvegarde
 
-Voir [le README dédié](backup/README.md).
+Voir [le README dédié](ansible/roles/backup/README.md).
 
 ### Notifications
 

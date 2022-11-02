@@ -102,7 +102,13 @@ elgeopaso2204              : ok=3    changed=0    unreachable=0    failed=0    s
 ### Lancer le playbook
 
 ```sh
-ansible-playbook -i inventory.yml playbook.yml
+ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass
+```
+
+Ou si le mot de passe du vault est dans le fichier `password_file` :
+
+```sh
+ansible-playbook -i inventory.yml playbook.yml --vault-password-file password_file
 ```
 
 ### Gestion des secrets
