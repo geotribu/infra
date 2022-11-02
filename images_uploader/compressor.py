@@ -44,7 +44,7 @@ tinify.key = getenv("TINIFY_API_KEY")
 logging.info(f"Tinify API key set: {tinify.key[:5]}...")
 
 # FOLDERS
-input_folder: Path = Path("~/Git/Geotribu/website/_to_upload")
+input_folder: Path = Path(Path.home() / "Documents/Geotribu/backup/")
 if not input_folder.exists():
     logging.critical(f"Input folder {input_folder} not found")
     exit(f"Input folder {input_folder} not found")
@@ -108,7 +108,10 @@ for image in input_folder.glob("**/*"):
                 method="scale",
                 width=1000,
             )
-            resized.to_file(str(output_folder / image.name))
+            output_filepath = output_folder / image.relative_to(input_folder)
+            output_filepath.parent.mkdir(parents=True, exist_ok=True)
+            # print(output_filepath.resolve())
+            resized.to_file(str(output_filepath.resolve()))
         except tinify.AccountError as error:
             logging.critical(f"Account error: {error}")
             exit("Account error. Check your API key!")
