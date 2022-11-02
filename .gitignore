@@ -85,3 +85,4 @@ images-idx.json
 config-sample.php
 _tinified/
 *.log
+images_uploader/*.log.*
