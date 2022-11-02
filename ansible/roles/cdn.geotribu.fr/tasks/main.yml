@@ -15,7 +15,7 @@
     name:
       - apache2
       - brotli
-    update_cache: yes
+    update_cache: true
     state: latest
 
 - name: Installation des paquets liés à PHP
@@ -32,7 +32,7 @@
     update_cache: yes
 
 # Apache modules
-- name: Désactive les module Apache
+- name: Désactive les modules Apache
   become: true
   community.general.apache2_module:
     name: "{{ item }}"
@@ -69,35 +69,46 @@
 - name: Crée le dossier de destination
   become: true
   file:
-    path: "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images/"
+    path: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
     state: directory
 
 - name: Copie les fichiers de TinyFileManager
   become: true
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/"
+    dest: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/"
     owner: geotribu
     group: www-data
     mode: "0770"
     backup: true
   with_fileglob:
-    - "../{{ sub_hostname }}/config.php"
-    - "../{{ sub_hostname }}/tinyfilemanager.php"
-    - "../{{ sub_hostname }}/translation.json"
+    - "../{{ cdn_subdomain }}/config.php"
+    - "../{{ cdn_subdomain }}/tinyfilemanager.php"
+    - "../{{ cdn_subdomain }}/translation.json"
 
 - name: Copie la configuration Apache2 du CDN
   become: true
   ansible.builtin.template:
     src: "templates/apache_cdn.conf.j2"
-    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ sub_hostname }}.conf"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ cdn_subdomain }}.conf"
 
 - name: Active le site
   become: true
-  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ sub_hostname }}"
-  notify: Restart Apache
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ cdn_subdomain }}"
+  # notify: Restart Apache
 
 - name: Désactive le site par défaut d'Apache
   become: true
   ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
+  notify: Restart Apache
+
+- name: Crée un certificat SSL pour {{ cdn_subdomain }}
+  shell: >-
+    certbot --apache
+    --noninteractive
+    -d {{ cdn_subdomain }}.{{ hostname }}
+    --email {{ geotribu_cert_mail }}
+    --agree-tos
+  become: true
+  register: cert_created
   notify: Reload Apache
