@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Create a release with compressed CDN images, then send a notification to Slack
+
+# Le petit manuel
+if [ "$1" = "-h" ] ; then
+    echo "Usage : ./$(basename $0)"
+    echo "Show this help: ./$(basename "$0") -h"
+    exit 0
+fi
+
+# -- Variables -------------
+_today=$(date +"%Y-%m-%d")
+_tomonth=$(date +"%Y.%m")
+
+# -- Script ----------------
+
+# Création du répertoire parent
+[ -d {{ dir_dest_backups }}cdn ] || mkdir -p {{ dir_dest_backups }}cdn
+
+# Generate archive of compressed static files
+: ' Mémo des options :
+    –c : crée un archive.
+    –z : compresse avec gzip.
+    –v : mode verbeux, affiche la progression.
+    –f : permet de spécifier le nom du fichier
+'
+tar -zcf {{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz -C {{ cdn_path }} images/
+FILE_SIZE=$(du --human-readable "{{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz" | cut -f1)
+
+# Move to the website repository
+cd {{ dir_website_source }}|| exit
+# Update git
+git pull --ff-only --tags
+# disable GitHub CLI prompts
+gh config set prompt disabled
+# Create release
+gh release create "$_tomonth" {{ dir_dest_backups }}cdn/bkp_cdn_"${_today}".tar.gz --title "Sauvegarde $_tomonth" --generate-notes
+
+# Remove assets of release older than 12 months
+previous_year=$(date -d "$_today -12 months")
+# gh release delete-asset 2021.11 bkp_cdn_2021-11-01.tar.gz
+
+# -- Slack Notification
+
+# prepare message
+{% raw %}sed "s/{{ ARCHIVE_SIZE }}/$FILE_SIZE/; s/{{ TAG }}/$_tomonth/"{% endraw %} {{ dir_backup_scripts }}tpl_slack_webhook_backup.json > {{ dir_dest_backups }}slack_webhook_backup_message_"$_today".json
+
+
+# send message to Slack web hook
+curl -X POST \
+     -H 'Content-type: application/json' \
+     --data "@{{ dir_dest_backups }}slack_webhook_backup_message_$_today.json" \
+     {{ webhook_url_backup }}
