@@ -30,7 +30,7 @@ tar -zcf "$HOME/backups/cdn/bkp_cdn_${_today}.tar.gz" -C /var/www/geotribu/cdn/ 
 FILE_SIZE=$(du --human-readable "$HOME/backups/cdn/bkp_cdn_${_today}.tar.gz" | cut -f1)
 
 # Move to the website repository
-cd /var/www/geotribu/website/ || exit
+cd /var/www/geotribu/website/sources/ || exit
 # Update git
 git pull --ff-only --tags
 # disable GitHub CLI prompts
