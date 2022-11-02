@@ -41,7 +41,7 @@
     Protocols h2 http/1.1
 
     # log
-    ErrorLog ${APACHE_LOG}/{{ geotribu_www }}_{{ sub_hostname }}_error.log
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ sub_hostname }}_error.log
     LogLevel warn
-    CustomLog ${APACHE_LOG}/{{ geotribu_www }}_{{ sub_hostname }}_access.log combined
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ sub_hostname }}_access.log combined
 </VirtualHost>
