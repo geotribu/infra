@@ -1,0 +1,46 @@
+# run Python in optimized mode
+WSGIPythonOptimize 2
+
+<VirtualHost *:{{ http_port }}>
+    ServerName {{ comments_subdomain }}.{{ hostname }}
+    DocumentRoot {{ comments_path }}
+
+    WSGIDaemonProcess geotribucomments python-home={{ comments_path }}.venv python-path={{ comments_path }} home=/var/www/{{ geotribu_www }}/{{ comments_subdomain }} user=geotribu group=www-data processes=2 threads=5
+    WSGIScriptAlias / {{ comments_path }}isso_wsgi.py
+
+    # HTTP/2
+    <IfModule http2_module>
+        ProtocolsHonorOrder On
+        Protocols h2 h2c http/1.1
+    </IfModule>
+
+    <Directory /var/www/{{ geotribu_www }}/comments>
+        WSGIProcessGroup geotribucomments
+        WSGIScriptReloading On
+        Require all granted
+
+        # GZIP compression
+        AddOutputFilterByType DEFLATE text/css text/html text/plain text/xml
+        AddOutputFilterByType DEFLATE application/x-javascript application/javascript
+        AddOutputFilterByType DEFLATE application/rss+xml
+        AddOutputFilterByType DEFLATE application/xml
+        AddOutputFilterByType DEFLATE application/json
+    </Directory>
+
+    # Active le cache pour les fichiers statiques pour 1 année
+    <FilesMatch "\.(ico|pdf|flv|jfif|jpg|jpeg|png|gif|js|css|webp)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+
+    # Indique que certains headers HTTP peuvent varier
+    Header append Vary User-Agent
+    Header append Vary Accept-Encoding
+
+    # HSTS - forcer les connexions en https pendant 180 jours
+    Header always set Strict-Transport-Security "max-age=15552001; includeSubDomains;"
+
+    # Apache log configuration
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ comments_subdomain }}_error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ comments_subdomain }}_access.log combined
+</VirtualHost>
