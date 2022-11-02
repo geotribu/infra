@@ -1,21 +1,26 @@
 ---
 # env
-test: true
-vagrant: true
+test: false
+vagrant: false
 
 # network
 http_port: 80
 https_port: 443
 
 # www-data
-hostname: geotribu.local
+hostname: geotribu.fr
 geotribu_www: geotribu
 georezo_www: georezo
+
+# certificats
+georezo_cert_mail: elpaso@georezo.net
+geotribu_cert_mail: contact@geotribu.fr
 
 # misc
 scripts_folder: "/home/geotribu/scripts/"
 
 # cdn
+cdn_subdomain: cdn
 
 # comments
 comments_subdomain: comments
