@@ -2,7 +2,12 @@
   hosts: all
   roles:
     - role: common
+      tags: base
+    - role: certbot
+      become: true
     - role: cdn.geotribu.fr
     - role: comments.geotribu.fr
-    - role: elgeopaso.georezo.net
+      tags: comments
+    # - role: pad.geotribu.fr
+    # - role: elgeopaso.georezo.net
     - role: backup
