@@ -112,7 +112,7 @@ sudo chmod 770 /var/www/geotribu/cdn/
 
 ### Configuration Isso
 
-Copier les fichiers `isso-prod.cfg` et `isso-wsgi.py` sur le serveur dans `/var/www/geotribu/comments`.
+Copier les fichiers `isso-prod.cfg` et `isso_wsgi.py` sur le serveur dans `/var/www/geotribu/comments`.
 
 #### Sécurité des secrets
 
