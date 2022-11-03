@@ -5,8 +5,18 @@ WSGIPythonOptimize 2
     ServerName {{ comments_subdomain }}.{{ hostname }}
     DocumentRoot {{ comments_path }}
 
-    WSGIDaemonProcess geotribucomments python-home={{ comments_path }}.venv python-path={{ comments_path }} home=/var/www/{{ geotribu_www }}/{{ comments_subdomain }} user=geotribu group=www-data processes=2 threads=5
-    WSGIScriptAlias / {{ comments_path }}isso_wsgi.py
+    # WSGIDaemonProcess geotribucomments \
+        python-home={{ comments_path }}.venv \
+        python-path={{ comments_path }} \
+        home={{ comments_path }} \
+        user=geotribu \
+        group=www-data \
+        processes=2 \
+        threads=5 \
+        # explicit encoding. See: http://blog.dscpl.com.au/2014/09/setting-lang-and-lcall-when-using.html
+        lang='en_US.UTF-8' \
+        locale='en_US.UTF-8'
+    # WSGIScriptAlias / {{ comments_path }}isso_wsgi.py
 
     # HTTP/2
     <IfModule http2_module>
@@ -20,11 +30,14 @@ WSGIPythonOptimize 2
         Require all granted
 
         # GZIP compression
-        AddOutputFilterByType DEFLATE text/css text/html text/plain text/xml
-        AddOutputFilterByType DEFLATE application/x-javascript application/javascript
-        AddOutputFilterByType DEFLATE application/rss+xml
-        AddOutputFilterByType DEFLATE application/xml
-        AddOutputFilterByType DEFLATE application/json
+        <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/css text/html text/javascript text/plain text/xml
+            AddOutputFilterByType DEFLATE application/x-javascript application/javascript
+            AddOutputFilterByType DEFLATE application/rss+xml
+            AddOutputFilterByType DEFLATE application/xml
+            AddOutputFilterByType DEFLATE application/json
+        </IfModule>
+
     </Directory>
 
     # Active le cache pour les fichiers statiques pour 1 année

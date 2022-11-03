@@ -1,6 +1,6 @@
 [general]
 ; database location, check permissions, automatically created if not exists
-dbpath = {{ cdn_path }}/images/commentaires/comments-geotribu-isso.db
+dbpath = {{ cdn_path }}images/commentaires/comments-geotribu-isso.db
 
 ; When set to true this will add the property “gravatar_image” containing
 ; the link to a gravatar image to every comment. If a comment does not contain
@@ -23,7 +23,7 @@ host =
 latest-enabled  = true
 
 ; Log console messages to file instead of standard out.
-# log-file = ./isso.log
+; log-file = ./isso.log
 
 ; time range that allows users to edit/remove their own comments.
 max-age = 45m
@@ -32,8 +32,8 @@ name = geotribu
 
 ; Send notifications via SMTP on new comments with activation (if moderated)
 ; and deletion links.
-notify = smtp,webhook
-
+; notify = smtp,webhook
+notify = smtp
 
 [admin]
 enabled = true
@@ -51,6 +51,11 @@ require-email = true
 salt = {{ comments_hash_salt }}
 algorithm = pbkdf2
 
+[markup]
+options = strikethrough, superscript, autolink
+allowed-elements =
+allowed-attributes =
+
 [moderation]
 enabled = true
 approve-if-email-previously-approved = true
@@ -64,7 +69,7 @@ limit = 100
 ; interface to listen on. Isso supports TCP/IP and
 ; unix domain sockets (but not with gevent)
 listen = http://localhost:9000
-#public-endpoint = https://comments.geotribu.fr
+; public-endpoint = https://comments.geotribu.fr
 
 [smtp]
 username = facteur@geotribu.fr
@@ -76,6 +81,6 @@ to = geotribu+comments@gmail.com
 from = Commentaires - Geotribu PTT <facteur@geotribu.fr>
 timeout = 10
 
-[webhook]
-url = https://hooks.slack.com/{{ webhook_url_comments }}
-template = webhook_template_slack.json
+;[webhook]
+;url = https://hooks.slack.com/{{ webhook_url_comments }}
+;template = webhook_template_slack.json
