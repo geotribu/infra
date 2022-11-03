@@ -85,6 +85,12 @@
     state: enabled
 
 # Divers
-- name: Crée l'alias bash pour ll
-  ansible.builtin.shell: alias ll="ls -als"
+- name: Copie les fichiers de profil
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "$HOME"
+    owner: geotribu
+    backup: true
+  with_fileglob:
+    - files/.*
   become_user: geotribu
