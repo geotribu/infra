@@ -53,14 +53,6 @@
     src: "templates/isso-prod.cfg.j2"
     dest: "{{ comments_path }}isso-prod.cfg"
 
-# - name: Recursively change ownership of a directory
-#   ansible.builtin.file:
-#     path: "{{ comments_path }}"
-#     state: directory
-#     recurse: true
-#     owner: geotribu
-#     group: www-data
-
 - name: Crée un environnement virtuel et installe les paquets de base
   ansible.builtin.pip:
     chdir: "{{ comments_path }}"
