@@ -57,7 +57,7 @@
     createhome: true
     name: geotribu
     shell: /bin/bash
-    groups: geoadmins, geocontributors, sudo
+    groups: geoadmins, geocontributors, sudo, www-data
 
 # Pare-feu
 - name: ufw allow ssh
