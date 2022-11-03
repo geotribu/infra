@@ -3,25 +3,33 @@
   ansible.builtin.apt:
     name:
       - apache2
-      # - apache2-dev # pour mod_wsgi
+      - apache2-utils
       - build-essential
-      # - libapache2-mod-wsgi-py3
+      - libapache2-mod-wsgi-py3
+      - libexpat1
+      - python3
       - python3-venv
       - software-properties-common
       - sqlite3
     update_cache: true
   become: true
 
-# Apache modules
+- name: Active les modules Apache
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - deflate
+    - headers
+    - http2
+  become: true
 
 # Installe Isso
 - name: "Crée le dossier de destination pour les commentaires (Isso) - {{ comments_path }}"
-  file:
+  ansible.builtin.file:
     path: "{{ comments_path }}"
     state: directory
-    recurse: true
     owner: geotribu
-    group: www-data
   become: true
 
 - name: Copie les dépendances à Isso
@@ -31,7 +39,6 @@
     dest: "{{ comments_path }}"
     owner: geotribu
     group: www-data
-    backup: true
   with_items:
     - files/webhook_template_slack.json
     - files/requirements.txt
@@ -40,48 +47,46 @@
   ansible.builtin.template:
     src: "templates/isso_wsgi.py.j2"
     dest: "{{ comments_path }}isso_wsgi.py"
-    owner: geotribu
-    group: www-data
-    mode: "664"
-    backup: true
-  become_user: geotribu
 
 - name: "Copie le fichier de configuration d'Isso dans {{ comments_path }}"
   ansible.builtin.template:
     src: "templates/isso-prod.cfg.j2"
     dest: "{{ comments_path }}isso-prod.cfg"
-    owner: geotribu
-    group: www-data
-    mode: "664"
-    backup: true
-  become_user: geotribu
 
-- name: Ensure virtualenv is configured and default packages updated
+# - name: Recursively change ownership of a directory
+#   ansible.builtin.file:
+#     path: "{{ comments_path }}"
+#     state: directory
+#     recurse: true
+#     owner: geotribu
+#     group: www-data
+
+- name: Crée un environnement virtuel et installe les paquets de base
   ansible.builtin.pip:
+    chdir: "{{ comments_path }}"
     name:
       - pip
       - setuptools
       - wheel
-    chdir: "{{ comments_path }}"
+    state: latest
     virtualenv: "{{ comments_path }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
-  become: true
+  become_user: geotribu
 
 - name: Installe les paquets Python pour Isso
   ansible.builtin.pip:
     chdir: "{{ comments_path }}"
     requirements: requirements.txt
     virtualenv: "{{ comments_path }}.venv"
-  become: true
+  become_user: geotribu
 
-- name: Change file ownership, group and permissions
+- name: Recursively change ownership of a directory
   ansible.builtin.file:
     path: "{{ comments_path }}"
+    state: directory
+    recurse: true
     owner: geotribu
     group: www-data
-    mode: "770"
-  become: true
-  become_user: geotribu
 
 - name: Copie la configuration Apache2 pour les commentaires
   ansible.builtin.template:
@@ -92,12 +97,18 @@
 - name: Active le site
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ comments_subdomain }}"
   become: true
-  # notify: Restart Apache
+  notify: Restart Apache
 
 - name: Désactive le site par défaut d'Apache
   become: true
   ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
-  # notify: Restart Apache
+  notify: Restart Apache
+
+- name: "Check si le certificat existe déjà"
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ comments_subdomain }}.{{ hostname }}/fullchain.pem"
+  become: true
+  register: cert_comments
 
 - name: Crée un certificat SSL pour {{ comments_subdomain }}
   shell: >-
@@ -109,3 +120,9 @@
   become: true
   register: cert_created
   notify: Reload Apache
+
+- name: "Décommente les lignes WSGI qui posent problème au certbot"
+  replace:
+    path: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ comments_subdomain }}-le-ssl.conf"
+    regexp: "^#+(.*WSGI.*)"
+    replace: '\1'
