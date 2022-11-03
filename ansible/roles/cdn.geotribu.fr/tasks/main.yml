@@ -47,7 +47,7 @@
   community.general.apache2_module:
     name: "{{ item }}"
     state: present
-    ignore_configcheck: true
+    # ignore_configcheck: true
   loop:
     - brotli
     - headers
