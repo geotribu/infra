@@ -65,6 +65,9 @@ webhook_url_comments: !vault |
   35633236346137363134643439346439393934653563356266616632653061396264643865306563
   3637
 
+# indexation
+dir_cdn_indexer_scripts: "/home/geotribu/scripts/cdn/indexer/"
+
 # pad
 pad_user_name: geotripad
 pad_pguser: geotripad

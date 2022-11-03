@@ -1,0 +1,63 @@
+---
+- name: "Installation des paquets liés au script d'indexation"
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-venv
+    update_cache: true
+  become: true
+
+#  Script d'indexation des images
+- name: "Crée le dossier où stocker le script d'indexation du CDN : {{ dir_cdn_indexer_scripts }}"
+  ansible.builtin.file:
+    path: "{{ dir_cdn_indexer_scripts }}"
+    state: directory
+    recurse: true
+    owner: geotribu
+    group: geotribu
+  become_user: geotribu
+
+- name: "Copie les fichiers liés au script dans {{ dir_cdn_indexer_scripts }}"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ dir_cdn_indexer_scripts }}"
+    owner: geotribu
+    group: geotribu
+  with_items:
+    - files/requirements.txt
+    - files/search_indexer.py
+  become_user: geotribu
+
+- name: Copie la configuration du script
+  ansible.builtin.template:
+    src: "templates/images-indexer.ini.j2"
+    dest: "{{ dir_cdn_indexer_scripts }}images-indexer.ini"
+  become: true
+
+- name: Crée un environnement virtuel et installe les paquets Python de base
+  ansible.builtin.pip:
+    chdir: "{{ dir_cdn_indexer_scripts }}"
+    name:
+      - pip
+      - setuptools
+      - wheel
+    state: latest
+    virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
+    virtualenv_command: /usr/bin/python3 -m venv
+  become_user: geotribu
+
+- name: Installe les paquets Python pour le script
+  ansible.builtin.pip:
+    chdir: "{{ dir_cdn_indexer_scripts }}"
+    requirements: requirements.txt
+    virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
+  become_user: geotribu
+
+# Planification
+- name: Planifie l'exécution du script
+  ansible.builtin.cron:
+    backup: true
+    name: "Indexation des images du CDN"
+    job: "@hourly cd {{ dir_cdn_indexer_scripts }} && {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py  > {{ dir_cdn_indexer_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
+    special_time: hourly
+  become_user: geotribu
