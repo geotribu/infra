@@ -1,0 +1,7 @@
+---
+- name: Vérifie que Docker a redémarré
+  become: true
+  listen: restart docker daemon
+  service:
+    name: docker
+    state: restarted
