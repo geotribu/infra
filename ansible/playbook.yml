@@ -2,16 +2,22 @@
   hosts: all
   roles:
     - role: common
-      tags: base
+      tags: base, geotribu, georezo
     - role: certbot
       become: true
+      tags: base, geotribu, georezo
+    - role: docker
+      become: true
+      tags: elgeopaso, georezo, pad
     - role: cdn.geotribu.fr
-      tags: cdn
+      tags: cdn, geotribu
     - role: cdn-indexer
-      tags: cdn, scripts, lunr
+      tags: cdn, geotribu, scripts, lunr
     - role: comments.geotribu.fr
-      tags: comments
+      tags: comments, geotribu
     # - role: pad.geotribu.fr
+    #   tags: geotribu, pad
     # - role: elgeopaso.georezo.net
+    #   tags: elgeopaso, georezo
     - role: backup
       tags: cdn, scripts
