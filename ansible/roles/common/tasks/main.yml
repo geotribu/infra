@@ -1,12 +1,11 @@
 ---
 # Paquets logiciels
 - name: Ajoute le dépôt de Git
-  become: true
   ansible.builtin.apt_repository:
     repo: "ppa:git-core/ppa"
+  become: true
 
 - name: "Installe les paquets de base"
-  become: true
   ansible.builtin.apt:
     name:
       - fail2ban
@@ -19,6 +18,7 @@
       - python3-setuptools
     update_cache: true
     state: present
+  become: true
 
 - name: MAJ les paquets installés
   become: true
@@ -60,13 +60,13 @@
     groups: geoadmins, geocontributors, sudo, www-data
 
 # Pare-feu
-- name: ufw allow ssh
-  become: true
+- name: Pare-feu UFW - Autorise SSH
   community.general.ufw:
     rule: allow
     name: OpenSSH
+  become: true
 
-- name: "UFW firewall allow HTTP on port {{ http_port }}"
+- name: Pare-feu UFW - Autorise HTTP sur le port {{ http_port }}
   become: true
   community.general.ufw:
     comment: rule set by Geotribu Ansible playbook
@@ -75,7 +75,7 @@
     proto: tcp
     state: enabled
 
-- name: "UFW firewall allow HTTPS on port {{ https_port }}"
+- name: Pare-feu UFW - Autorise HTTPS sur le port {{ https_port }}
   become: true
   community.general.ufw:
     comment: rule set by Geotribu Ansible playbook
