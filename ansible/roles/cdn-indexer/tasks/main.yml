@@ -58,6 +58,6 @@
   ansible.builtin.cron:
     backup: true
     name: "Indexation des images du CDN"
-    job: "@hourly cd {{ dir_cdn_indexer_scripts }} && {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py  > {{ dir_cdn_indexer_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
+    job: "cd {{ dir_cdn_indexer_scripts }} && {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py  > {{ dir_cdn_indexer_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
     special_time: hourly
   become_user: geotribu
