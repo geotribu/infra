@@ -2,7 +2,9 @@
 WSGIPythonOptimize 2
 
 <VirtualHost *:{{ http_port }}>
+    ServerAdmin {{ geotribu_cert_mail }}
     ServerName {{ comments_subdomain }}.{{ hostname }}
+
     DocumentRoot {{ comments_path }}
 
     # WSGIDaemonProcess geotribucomments \
