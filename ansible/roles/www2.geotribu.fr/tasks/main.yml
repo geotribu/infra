@@ -1,0 +1,76 @@
+---
+# Installe Git
+- name: Ajoute le dépôt de Git
+  ansible.builtin.apt_repository:
+    repo: "ppa:git-core/ppa"
+  become: true
+
+- name: "Installe les paquets de base"
+  become: true
+  ansible.builtin.apt:
+    name:
+      - git
+
+# Cible de la sauvegarde
+- name: Crée le dossier de destination pour la sauvegarde du site HTML
+  ansible.builtin.file:
+    path: "{{ dir_website_html }}"
+    state: directory
+    recurse: true
+    owner: geotribu
+    group: www-data
+  become: true
+
+- name: Clone le dépôt du site Geotribu, branche GitHub Pages
+  ansible.builtin.git:
+    repo: https://github.com/geotribu/website.git
+    dest: "{{ dir_website_html }}"
+    depth: 1
+    single_branch: yes
+    version: gh-pages
+  become_user: geotribu
+
+- name: Configure le dépôt local - nom d'utilisateur
+  community.general.git_config:
+    scope: local
+    repo: "{{ dir_website_html }}"
+    name: user.name
+    value: Geotribu
+
+- name: Configure le dépôt local - email
+  community.general.git_config:
+    scope: local
+    repo: "{{ dir_website_html }}"
+    name: user.email
+    value: geotribu@gmail.com
+
+- name: Planifie l'exécution quotidienne de la mise à jour du dépôt
+  ansible.builtin.cron:
+    backup: true
+    name: "Récupération quotidienne du site"
+    job: "git -C cd {{ dir_website_html }} pull --prune --rebase"
+    special_time: daily
+  become_user: geotribu
+
+# Site Apache
+- name: Copie la configuration Apache2 du CDN
+  ansible.builtin.template:
+    src: "templates/apache_www.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ site_subdomain }}.conf"
+  become: true
+
+- name: Active le site
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ site_subdomain }}"
+  # notify: Restart Apache
+
+- name: Crée un certificat SSL pour {{ site_subdomain }}
+  shell: >-
+    certbot --apache
+    --noninteractive
+    -d {{ site_subdomain }}.{{ hostname }}
+    --email {{ geotribu_cert_mail }}
+    --agree-tos
+  become: true
+  register: cert_created
+  notify: Reload Apache
