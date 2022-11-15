@@ -8,6 +8,7 @@
 - name: "Installe les paquets de base"
   ansible.builtin.apt:
     name:
+      - acl # évite les erreurs https://docs.ansible.com/ansible/latest/user_guide/become.html#resolving-temporary-file-error-messsages
       - fail2ban
       - ntp
       - curl
