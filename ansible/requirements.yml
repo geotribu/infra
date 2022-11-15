@@ -1,0 +1,6 @@
+---
+roles:
+  - name: galaxyproject.postgresql
+
+collections:
+  - name: community.postgresql

@@ -17,6 +17,12 @@ python -m pip install -U setuptools wheel
 python -m pip install -U -r ansible/requirements.txt
 ```
 
+Installer les rôles et collections Ansible :
+
+```sh
+ansible-galaxy install -r ansible/requirements.yml
+```
+
 Se déplacer dans ce dossier :
 
 ```sh
