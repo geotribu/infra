@@ -1,5 +1,7 @@
 <VirtualHost *:{{ http_port }}>
+    ServerAdmin {{ geotribu_cert_mail }}
     ServerName {{ sub_hostname }}.{{ hostname }}
+
     DocumentRoot /var/www/{{ geotribu_www }}/{{ sub_hostname }}/
     Alias /img "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images/"
     DirectoryIndex tinyfilemanager.php
@@ -37,8 +39,6 @@
 
     # HSTS - forcer les connexions en https pendant 180 jours
     Header always set Strict-Transport-Security "max-age=15552001; includeSubDomains;"
-    # enable HTTP/2, if available
-    Protocols h2 http/1.1
 
     # log
     ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ sub_hostname }}_error.log
