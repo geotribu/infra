@@ -1,0 +1,15 @@
+<VirtualHost *:{{ http_port }}>
+    ServerAdmin {{ geotribu_cert_mail }}
+    ServerName {{ pad_subdomain }}.{{ hostname }}
+
+    # Configuration du proxy pour pointer sur le Docker
+    # ProxyPass / http://127.0.0.1:9876/
+    # ProxyPassReverse / http://127.0.0.1:9876/
+    # ProxyRequests Off
+    # ProxyVia On
+
+    # Apache log configuration
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ pad_subdomain }}_error.log
+    LogLevel debug
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ pad_subdomain }}_access.log combined
+</VirtualHost>

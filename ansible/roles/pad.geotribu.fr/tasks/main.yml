@@ -1,0 +1,143 @@
+---
+# Paquets logiciels
+- name: "Installe les paquets de base"
+  ansible.builtin.apt:
+    name:
+      - python3-psycopg2 # requis pour les modules Ansible community.postgresql_*
+      - python3-docker # requis pour les modules Ansible community.docker_*
+    state: present
+  become: true
+
+- name: Crée l'utilisateur du pad sur le système
+  ansible.builtin.user:
+    name: "{{ pad_user_name }}"
+    shell: /bin/bash
+  become: true
+
+- name: Crée l'utilisateur du pad sur PostgreSQL
+  community.postgresql.postgresql_user:
+    name: "{{ pad_pguser }}"
+    password: "{{ pad_pgpass }}"
+    comment: Utilisateur gérant la base de données du pad (hedgedoc)
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+  become_user: postgres
+  become: true
+
+- name: Crée la base de données du pad
+  community.postgresql.postgresql_db:
+    name: "{{ pad_db }}"
+    owner: "{{ pad_pguser }}"
+    encoding: "UTF-8"
+  become: true
+  become_user: postgres
+
+- name: Active l'extension pg_stat_statements sur la base
+  community.postgresql.postgresql_ext:
+    name: pg_stat_statements
+    db: "{{ pad_db }}"
+  become: true
+  become_user: postgres
+
+# Fichiers de configuration du pad
+- name: "Crée le dossier de configuration du pad"
+  ansible.builtin.file:
+    path: "/home/{{ pad_user_name }}/theme/"
+    state: directory
+    owner: "{{ pad_user_name }}"
+    group: "{{ pad_user_name }}"
+  become_user: "{{ pad_user_name }}"
+  become: true
+
+- name: Ajout du document par défaut
+  ansible.builtin.copy:
+    src: files/default.md
+    dest: "/home/{{ pad_user_name }}/theme/default.md"
+    mode: 0644
+    owner: "{{ pad_user_name }}"
+    group: "{{ pad_user_name }}"
+  become_user: "{{ pad_user_name }}"
+  become: true
+
+# Lancement du pad
+- name: Launch hedgedoc container
+  community.docker.docker_container:
+    name: geotripad
+    image: quay.io/hedgedoc/hedgedoc:1.9.5-alpine
+    pull: false
+    detach: true
+    state: started
+    comparisons:
+      "*": strict
+    restart_policy: always
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - "/home/{{ pad_user_name }}/uploads:/hedgedoc/public/uploads"
+      - "/home/{{ pad_user_name }}/theme/default.md:/hedgedoc/public/default.md"
+    # etc_hosts:
+    #   git.local: "{{ ansible_docker0.ipv4.address }}"
+    env:
+      DEBUG: "true"
+      CMD_ALLOW_ANONYMOUS_EDITS: "false"
+      CMD_ALLOW_ANONYMOUS_VIEWS: "true"
+      CMD_ALLOW_EMAIL_REGISTER: "false"
+      CMD_ALLOW_ORIGIN: "localhost,geotribu.fr"
+      CMD_ALLOW_PDF_EXPORT: "false"
+      # CMD_CSP_ENABLE: "true"
+      CMD_DB_URL: "postgres://{{ pad_pguser }}:{{ pad_pgpass }}@localhost:5432/{{ pad_db }}"
+      CMD_DEFAULT_PERMISSION: limited
+      CMD_DEFAULT_USE_HARD_BREAK: "false"
+      CMD_DOMAIN: "{{ pad_subdomain }}.{{ hostname }}"
+      CMD_EMAIL: "false"
+      CMD_HOST: "127.0.0.1"
+      CMD_HSTS_ENABLE: "true"
+      CMD_LOGLEVEL: "debug"
+      # CMD_PATH: "/var/run/hedgedoc.sock"
+      CMD_PORT: "3000"
+      CMD_URL_ADDPORT: "false" # external port
+      # CMD_USECDN: "false"
+      CMD_PROTOCOL_USESSL: "true" # will be done by nginx
+      CMD_IMAGE_UPLOAD_TYPE: filesystem
+      # CMD_SESSION_SECRET: "yipi8901csq"
+# Configuration Apache2 (reverse proxy)
+- name: Active les modules Apache
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - headers
+    # - http2
+    - proxy
+    - proxy_http
+    # - proxy_http2
+    - setenvif
+  become: true
+- name: Copie la configuration Apache2 du pad
+  become: true
+  ansible.builtin.template:
+    src: "templates/apache_pad.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ pad_subdomain }}.conf"
+
+- name: Active le site
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ pad_subdomain }}"
+  # notify: Reload Apache
+
+# Certificat SSL
+- name: "Check si le certificat existe déjà"
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ pad_subdomain }}.{{ hostname }}/fullchain.pem"
+  become: true
+  register: cert_comments
+
+- name: Crée un certificat SSL pour {{ pad_subdomain }}
+  shell: >-
+    certbot --apache
+    --noninteractive
+    -d {{ pad_subdomain }}.{{ hostname }}
+    --email {{ geotribu_cert_mail }}
+    --agree-tos
+  become: true
+  register: cert_created
+  # notify: Reload Apache
