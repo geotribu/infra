@@ -48,7 +48,7 @@
   ansible.builtin.cron:
     backup: true
     name: "Récupération quotidienne du site"
-    job: "git -C cd {{ dir_website_html }} pull --prune --rebase"
+    job: "git -C {{ dir_website_html }} pull --prune --rebase"
     special_time: daily
   become_user: geotribu
 
