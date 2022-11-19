@@ -38,14 +38,22 @@ else:
 
 
 # charge l'index sérialisé
-idx = Index.load(serialized_idx)
+idx = Index.load(serialized_idx.get("index"))
+images_dict = serialized_idx.get("images")
 
 # recherche
-search_results_low = idx.search("pyt*")
+search_results_low: list[dict] = idx.search("*satellite*")
+
+extended_results = []
+
+for search_result in search_results_low:
+    mapped_img = images_dict.get(search_result.get("ref"))
+    search_result.update({"width": mapped_img[0], "height": mapped_img[1]})
+
 pprint(search_results_low)
 
-search_results_up = idx.search("PYT*")
-pprint(search_results_up)
+# search_results_up = idx.search("PYT*")
+# pprint(search_results_up)
 
 
-print(search_results_low == search_results_up)
+# print(search_results_low == search_results_up)
