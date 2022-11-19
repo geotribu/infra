@@ -5,8 +5,11 @@ import json
 import logging
 import sys
 from configparser import ConfigParser
+from math import floor
+from math import log as math_log
 from os.path import expanduser, expandvars
 from pathlib import Path
+from typing import List
 
 # 3rd party
 import imagesize
@@ -16,7 +19,32 @@ from lunr import lunr
 configuration_file: Path = Path(__file__).parent / "images-indexer.ini"
 start_folder: Path = Path.home() / "Images"
 extensions_to_index: tuple = (".gif", ".jpg", ".jpeg", ".png", ".svg", ".webp")
-documents: list = []
+images_list: List[dict] = []
+images_dict: dict = {}
+
+# -- FUNCTIONS ---------------------------------------------------------------
+
+
+def convert_octets(octets: int) -> str:
+    """Convert a mount of octets in readable size.
+    :param int octets: mount of octets to convert
+    :Example:
+    .. code-block:: python
+        >>> convert_octets(1024)
+        "1ko"
+    """
+    # check zero
+    if octets == 0:
+        return "0 octet"
+
+    # conversion
+    size_name = ("octets", "Ko", "Mo", "Go", "To", "Po")
+    i = int(floor(math_log(octets, 1024)))
+    p = pow(1024, i)
+    s = round(octets / p, 2)
+
+    return "%s %s" % (s, size_name[i])
+
 
 # -- MAIN --------------------------------------------------------------------
 
@@ -72,9 +100,9 @@ for file in start_folder.glob("**/*"):
         # print(width)
 
         # store image metadata as a dict into documents list
-        documents.append(
+        images_list.append(
             {
-                "name": file.name,
+                "name": file.stem,
                 "img_type": file.suffix,
                 "path": str(file.relative_to(start_folder)),
                 "width": width,
@@ -82,14 +110,17 @@ for file in start_folder.glob("**/*"):
             }
         )
 
+        images_dict[str(file.relative_to(start_folder))] = width, height
+
 # create index
 idx = lunr(
     ref="path",
     fields=[dict(field_name="name", boost=10), "img_type", "path"],
-    documents=documents,
+    documents=images_list,
 )
 
-serialized_idx = idx.serialize()
+output_dict = {"images": images_dict, "index": idx.serialize()}
+
 
 # exporte en JSON
 output_filepath: Path = start_folder / "search-index.json"
@@ -99,8 +130,8 @@ with output_filepath.open(mode="w") as fd:
     else:
         prettify = 0
 
-    json.dump(serialized_idx, fd, indent=4)
+    json.dump(output_dict, fd, indent=prettify, sort_keys=True, separators=(",", ":"))
 
 logging.info(
-    f"Index created: {output_filepath}.\n\tSize: {output_filepath.stat().st_size}"
+    f"Index created: {output_filepath}.\n\tSize: {convert_octets(output_filepath.stat().st_size)}"
 )
