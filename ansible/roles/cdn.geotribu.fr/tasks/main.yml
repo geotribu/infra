@@ -82,9 +82,9 @@
     mode: "0770"
     backup: true
   with_fileglob:
-    - "../{{ cdn_subdomain }}/config.php"
-    - "../{{ cdn_subdomain }}/tinyfilemanager.php"
-    - "../{{ cdn_subdomain }}/translation.json"
+    - "files/config.php"
+    - "files/tinyfilemanager.php"
+    - "files/translation.json"
 
 - name: Copie la configuration Apache2 du CDN
   become: true
