@@ -12,7 +12,8 @@ from urllib.request import Request, urlopen
 from lunr.index import Index
 
 # -- VARIABLES ---------------------------------------------------------------
-index_file: str = "https://cdn.geotribu.fr/img/search-index.json"
+base_url: str = "https://cdn.geotribu.fr/img/"
+index_file: str = f"{base_url}/search-index.json"
 user_agent: str = "Python urllib/3 Testing Geotribu search index"
 
 # -- MAIN --------------------------------------------------------------------
@@ -48,7 +49,13 @@ extended_results = []
 
 for search_result in search_results_low:
     mapped_img = images_dict.get(search_result.get("ref"))
-    search_result.update({"width": mapped_img[0], "height": mapped_img[1]})
+    search_result.update(
+        {
+            "width": mapped_img[0],
+            "height": mapped_img[1],
+            "full_url": f"{base_url}{search_result.get('ref')}",
+        }
+    )
 
 pprint(search_results_low)
 
