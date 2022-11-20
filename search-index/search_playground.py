@@ -123,6 +123,8 @@ def download_search_index(
 
 # -- MAIN --------------------------------------------------------------------
 
+index_local_file.parent.mkdir(parents=True, exist_ok=True)
+
 # get local search index
 get_or_update_local_search_index = download_search_index(
     url_index_to_download=index_remote_file,
