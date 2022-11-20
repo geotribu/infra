@@ -11,6 +11,20 @@ from urllib.request import Request, urlopen
 # 3rd party
 from lunr.index import Index
 
+# -- LOGGING ------------------------------------------------------------------
+# levels: 10 = debug, 20 = info, 30 = warning, 40 = error
+log_level: int = 10
+
+logging.basicConfig(
+    level=log_level,
+    format="%(asctime)s||%(levelname)s||%(module)s||%(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    force=1,
+)
+
+logging.debug(f"Log level: {logging.getLevelName(log_level)}")
+
+
 # -- VARIABLES ---------------------------------------------------------------
 base_url: str = "https://cdn.geotribu.fr/img/"
 index_file: str = f"{base_url}/search-index.json"
