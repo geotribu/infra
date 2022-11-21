@@ -33,7 +33,7 @@ logging.debug(f"Log level: {logging.getLevelName(log_level)}")
 base_url: str = "https://cdn.geotribu.fr/img/"
 index_remote_file: str = f"{base_url}/search-index.json"
 index_local_file: Path = Path().home() / ".geotribu/search/cdn_search_index.json"
-index_rotating_hours: int = 1
+index_rotating_hours: int = 24
 user_agent: str = "Python urllib/3 Testing Geotribu search index"
 
 
