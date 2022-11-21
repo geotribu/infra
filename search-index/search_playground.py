@@ -173,3 +173,12 @@ for search_result in search_results:
     )
 
 pprint(search_results)
+
+# pprint(idx.search("satellite"))
+
+pprint(len(idx.search("qgis")))
+print("\n\n")
+pprint(len(idx.search("name:qgis")))
+pprint(idx.search("+path:logo +name:qgis"))
+pprint(idx.search("openstreetmap logo"))
+pprint(idx.search("+openstreetmap +logo"))
