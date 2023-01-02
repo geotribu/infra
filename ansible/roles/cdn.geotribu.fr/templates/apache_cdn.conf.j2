@@ -2,9 +2,13 @@
     ServerAdmin {{ geotribu_cert_mail }}
     ServerName {{ sub_hostname }}.{{ hostname }}
 
-    DocumentRoot /var/www/{{ geotribu_www }}/{{ sub_hostname }}/
-    Alias /img "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images/"
+    DocumentRoot /var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/
+    Alias /img "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
     DirectoryIndex tinyfilemanager.php
+
+    # Handle messed up links between post-authentication redirection and direct hyperlink to images
+    Redirect permanent /img/tinyfilemanager.php /tinyfilemanager.php
+
 
     # HTTP/2
     <IfModule http2_module>
