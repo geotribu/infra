@@ -35,6 +35,9 @@ name = geotribu
 ; notify = smtp,webhook
 notify = smtp
 
+; Allow users to request E-mail notifications for replies to their post.
+reply-notifications = true
+
 [admin]
 enabled = true
 password = {{ comments_admin_password }}
@@ -59,17 +62,17 @@ allowed-attributes =
 [moderation]
 enabled = true
 approve-if-email-previously-approved = true
-purge-after = 90d
+purge-after = 365d
 
 [rss]
-base = "https://static.geotribu.fr/"
+base = https://static.geotribu.fr
 limit = 100
 
 [server]
 ; interface to listen on. Isso supports TCP/IP and
 ; unix domain sockets (but not with gevent)
 listen = http://localhost:9000
-; public-endpoint = https://comments.geotribu.fr
+public-endpoint = https://comments.geotribu.fr
 
 [smtp]
 username = facteur@geotribu.fr
