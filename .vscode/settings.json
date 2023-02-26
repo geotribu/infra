@@ -1,6 +1,16 @@
 {
-    "python.formatting.provider": "black",
     "git.enableCommitSigning": true,
     "editor.formatOnSave": true,
-    "autoDocstring.docstringFormat": "one-line-sphinx"
+    "autoDocstring.docstringFormat": "one-line-sphinx",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "isort.args": [
+        "--profile",
+        "black"
+    ]
 }
