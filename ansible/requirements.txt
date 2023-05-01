@@ -1,2 +1,2 @@
-ansible>=6.4,<7.5
+ansible>=6.4,<7.6
 ansible-lint>=6.8,<6.15
