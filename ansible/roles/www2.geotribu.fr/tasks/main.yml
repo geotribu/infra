@@ -52,7 +52,6 @@
   ansible.builtin.git:
     repo: https://github.com/geotribu/website.git
     dest: "{{ dir_website_git }}"
-    depth: 1
     force: true
     single_branch: yes
     version: "{{ website_main_branch }}"
