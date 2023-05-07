@@ -6,7 +6,7 @@ Créer un environnement virtuel :
 
 ```sh
 python3 -m venv .venv
-source .venv/bin.activate
+source .venv/bin/activate
 ```
 
 MAJ l'outillage puis installer Ansible :
