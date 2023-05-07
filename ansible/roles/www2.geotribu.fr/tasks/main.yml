@@ -11,7 +11,33 @@
     name:
       - git
 
-# Cible de la sauvegarde
+# Configuration profil utilisateur pour Mkdocs
+- name: Ajout les variables d'environnement liées à Mkdocs au profil
+  ansible.builtin.blockinfile:
+    backup: true
+    create: true
+    path: /home/geotribu/.profile
+    block: |
+      export MKDOCS_ENABLE_PLUGIN_GIT_AUTHORS=true
+      export MKDOCS_ENABLE_PLUGIN_GIT_COMMITTERS=true
+      export MKDOCS_ENABLE_PLUGIN_GIT_DATES=true
+      export MKDOCS_ENABLE_PLUGIN_PRIVACY=true
+      export MKDOCS_ENABLE_PLUGIN_RSS=true
+      export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugin/git-committers
+      export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugin/privacy
+  become_user: geotribu
+
+# Dossier cible pour le projet Git
+- name: Crée le dossier où cloner le projet Git du site
+  ansible.builtin.file:
+    path: "{{ dir_website_git }}"
+    state: directory
+    recurse: true
+    owner: geotribu
+    group: geotribu
+  become: true
+
+# Dossier cible pour le HTML
 - name: Crée le dossier de destination pour la sauvegarde du site HTML
   ansible.builtin.file:
     path: "{{ dir_website_html }}"
@@ -21,34 +47,76 @@
     group: www-data
   become: true
 
-- name: Clone le dépôt du site Geotribu, branche GitHub Pages
+# Clone initial du site
+- name: Clone le dépôt du site Geotribu sur la branche principale
   ansible.builtin.git:
     repo: https://github.com/geotribu/website.git
-    dest: "{{ dir_website_html }}"
+    dest: "{{ dir_website_git }}"
     depth: 1
+    force: true
     single_branch: yes
-    version: gh-pages
+    version: "{{ website_main_branch }}"
   become_user: geotribu
 
 - name: Configure le dépôt local - nom d'utilisateur
   community.general.git_config:
     scope: local
-    repo: "{{ dir_website_html }}"
+    repo: "{{ dir_website_git }}"
     name: user.name
     value: Geotribu
 
 - name: Configure le dépôt local - email
   community.general.git_config:
     scope: local
-    repo: "{{ dir_website_html }}"
+    repo: "{{ dir_website_git }}"
     name: user.email
     value: geotribu@gmail.com
+
+- name: Crée un environnement virtuel et installe les paquets de base
+  ansible.builtin.pip:
+    chdir: "{{ dir_website_git }}"
+    name:
+      - pip
+      - setuptools
+      - wheel
+    state: latest
+    virtualenv: "{{ dir_website_git }}.venv"
+    virtualenv_command: /usr/bin/python3 -m venv
+  become_user: geotribu
+
+- name: Installe les paquets Python pour générer le site principal
+  ansible.builtin.pip:
+    chdir: "{{ dir_website_git }}"
+    requirements: requirements-insiders.txt
+    virtualenv: "{{ dir_website_git }}.venv"
+  become_user: geotribu
+  environment:
+    GH_TOKEN_MATERIAL_INSIDERS: "{{ token_github_material_insiders }}"
+
+# Génère le site
+- name: Génère le site
+  ansible.builtin.shell: >-
+    source .venv/bin/activate &&
+    python scripts/mkdocs_populate_latest.py &&
+    python scripts/mkdocs_config_merger.py -c mkdocs.yml &&
+    mkdocs build --clean --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+  args:
+    chdir: "{{ dir_website_git }}"
+    executable: /bin/bash
+  become_user: geotribu
 
 - name: Planifie l'exécution quotidienne de la mise à jour du dépôt
   ansible.builtin.cron:
     backup: true
     name: "Récupération quotidienne du site"
-    job: "git -C {{ dir_website_html }} pull --prune --rebase"
+    job: >
+      git -C {{ dir_website_git }} restore . &&
+      git -C {{ dir_website_git }} pull --prune --rebase &&
+      cd {{ dir_website_git }} &&
+      {{ dir_website_git }}.venv/bin/python scripts/mkdocs_populate_latest.py &&
+      {{ dir_website_git }}.venv/bin/python scripts/mkdocs_config_merger.py -c mkdocs.yml &&
+      {{ dir_website_git }}.venv/bin/python -m mkdocs build --clean --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+
     special_time: daily
   become_user: geotribu
 
