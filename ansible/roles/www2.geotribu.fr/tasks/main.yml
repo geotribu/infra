@@ -25,6 +25,8 @@
       export MKDOCS_ENABLE_PLUGIN_RSS=true
       export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugin/git-committers
       export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugin/privacy
+      export MKDOCS_SITE_COPYRIGHT='<span class=\"copyleft\">&copy;</span> Geotribu (miroir)'
+      export MKDOCS_SITE_URL=https://www2.geotribu.fr/
   become_user: geotribu
 
 # Dossier cible pour le projet Git
@@ -140,4 +142,4 @@
     --agree-tos
   become: true
   register: cert_created
-  notify: Reload Apache
+  # notify: Reload Apache
