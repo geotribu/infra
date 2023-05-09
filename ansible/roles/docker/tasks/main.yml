@@ -52,6 +52,7 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
+      - docker-buildx-plugin
       - docker-compose-plugin
     state: latest
     update_cache: true
@@ -66,6 +67,14 @@
 - name: "Ajoute l'utilisateur geotribu au groupe Docker"
   ansible.builtin.user:
     name: geotribu
+    groups: docker
+    state: present
+    append: true
+  become: true
+
+- name: "Ajoute l'utilisateur geotripad au groupe Docker"
+  ansible.builtin.user:
+    name: "{{ pad_user_name }}"
     groups: docker
     state: present
     append: true
