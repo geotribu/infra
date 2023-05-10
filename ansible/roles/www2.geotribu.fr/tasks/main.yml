@@ -109,8 +109,9 @@
 - name: Planifie l'exécution quotidienne de la mise à jour du dépôt
   ansible.builtin.cron:
     backup: true
-    name: "Récupération quotidienne du site"
+    name: "MAJ quotidienne du site miroir"
     job: >
+      . $HOME/.profile ;
       git -C {{ dir_website_git }} restore . &&
       git -C {{ dir_website_git }} pull --prune --rebase &&
       cd {{ dir_website_git }} &&
@@ -119,6 +120,7 @@
       {{ dir_website_git }}.venv/bin/python -m mkdocs build --clean --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
 
     special_time: daily
+    user: geotribu
   become_user: geotribu
 
 # Site Apache
