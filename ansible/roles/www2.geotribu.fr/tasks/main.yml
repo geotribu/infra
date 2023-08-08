@@ -10,9 +10,21 @@
   ansible.builtin.apt:
     name:
       - git
+      # Dépendances optionnelles pour Material for Mkdocs.
+      # L'ordre est important : d'abord les dépendances de build
+      - libbrotli1=1.0.9-2build6
+      - libffi-dev
+      - libfreetype6-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libz-dev
+      # puis les dépendances de primaires
+      - libcairo2-dev
+      - pngquant
+    update_cache: true
 
 # Configuration profil utilisateur pour Mkdocs
-- name: Ajout les variables d'environnement liées à Mkdocs au profil
+- name: Ajoute les variables d'environnement liées à Mkdocs au profil
   ansible.builtin.blockinfile:
     backup: true
     create: true
@@ -23,8 +35,12 @@
       export MKDOCS_ENABLE_PLUGIN_GIT_DATES=true
       export MKDOCS_ENABLE_PLUGIN_PRIVACY=true
       export MKDOCS_ENABLE_PLUGIN_RSS=true
+      export MKDOCS_ENABLE_PLUGIN_SOCIAL=true
+      export MKDOCS_ENABLE_PLUGIN_SOCIAL_CARDS=true
+      export MKDOCS_ENABLE_PLUGIN_TAGS=true
       export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugin/git-committers
       export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugin/privacy
+      export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{dir_website_cache}}plugin/social
       export MKDOCS_SITE_COPYRIGHT='<span class=\"copyleft\">&copy;</span> Geotribu (miroir)'
       export MKDOCS_SITE_URL=https://www2.geotribu.fr/
   become_user: geotribu
@@ -98,9 +114,9 @@
 - name: Génère le site
   ansible.builtin.shell: >-
     source .venv/bin/activate &&
-    python scripts/mkdocs_populate_latest.py &&
-    python scripts/mkdocs_config_merger.py -c mkdocs.yml &&
-    mkdocs build --clean --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+    python scripts/050_mkdocs_populate_latest.py -c mkdocs.yml &&
+    python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
+    mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
   args:
     chdir: "{{ dir_website_git }}"
     executable: /bin/bash
@@ -115,9 +131,9 @@
       git -C {{ dir_website_git }} restore . &&
       git -C {{ dir_website_git }} pull --prune --rebase &&
       cd {{ dir_website_git }} &&
-      {{ dir_website_git }}.venv/bin/python scripts/mkdocs_populate_latest.py &&
-      {{ dir_website_git }}.venv/bin/python scripts/mkdocs_config_merger.py -c mkdocs.yml &&
-      {{ dir_website_git }}.venv/bin/python -m mkdocs build --clean --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+      {{ dir_website_git }}.venv/bin/python scripts/050_mkdocs_populate_latest.py &&
+      {{ dir_website_git }}.venv/bin/python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
+      {{ dir_website_git }}.venv/bin/python -m mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
 
     special_time: daily
     user: geotribu
