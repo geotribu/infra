@@ -9,9 +9,9 @@
     - role: docker
       become: true
       tags: elgeopaso, georezo, pad
-    # - role: postgresql
-    #   # become: true
-    #   tags: elgeopaso, pad, postgres
+    - role: postgresql
+      # become: true
+      tags: elgeopaso, pad, postgres
     - role: cdn.geotribu.fr
       tags: cdn, geotribu
     - role: cdn-indexer
@@ -22,7 +22,7 @@
       tags: www, geotribu
     - role: pad.geotribu.fr
       tags: geotribu, pad
-    # - role: elgeopaso.georezo.net
-    #   tags: elgeopaso, georezo
+    - role: elgeopaso.georezo.net
+      tags: elgeopaso, georezo
     - role: backup
       tags: cdn, scripts

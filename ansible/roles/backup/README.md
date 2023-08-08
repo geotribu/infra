@@ -1,6 +1,6 @@
 # Sauvegarde du CDN
 
-> Voir [l'article présentant le fonctionnement sur Geotribu](https://static.geotribu.fr/contribuer/internal/backup/).
+> Voir [l'article présentant le fonctionnement sur Geotribu](https://geotribu.fr/contribuer/internal/backup/).
 
 ## GitHub CLI
 

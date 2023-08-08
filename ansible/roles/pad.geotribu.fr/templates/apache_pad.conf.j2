@@ -2,9 +2,14 @@
     ServerAdmin {{ geotribu_cert_mail }}
     ServerName {{ pad_subdomain }}.{{ hostname }}
 
+    RewriteEngine on
+    RewriteCond %{REQUEST_URI} ^/socket.io             [NC]
+    RewriteCond %{HTTP:Upgrade} =websocket             [NC]
+    RewriteRule /(.*)  ws://127.0.0.1:3000/$1          [P,L]
+
     # Configuration du proxy pour pointer sur le Docker
-    # ProxyPass / http://127.0.0.1:9876/
-    # ProxyPassReverse / http://127.0.0.1:9876/
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
     # ProxyRequests Off
     # ProxyVia On
 

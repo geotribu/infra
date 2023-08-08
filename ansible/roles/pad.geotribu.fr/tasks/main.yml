@@ -10,8 +10,11 @@
 
 - name: Crée l'utilisateur du pad sur le système
   ansible.builtin.user:
+    append: true
     name: "{{ pad_user_name }}"
+    groups: www-data
     shell: /bin/bash
+    state: present
   become: true
 
 - name: Crée l'utilisateur du pad sur PostgreSQL
@@ -63,7 +66,7 @@
 - name: Launch hedgedoc container
   community.docker.docker_container:
     name: geotripad
-    image: quay.io/hedgedoc/hedgedoc:1.9.5-alpine
+    image: quay.io/hedgedoc/hedgedoc:1.9.7
     pull: false
     detach: true
     state: started
@@ -82,10 +85,10 @@
       CMD_ALLOW_ANONYMOUS_EDITS: "false"
       CMD_ALLOW_ANONYMOUS_VIEWS: "true"
       CMD_ALLOW_EMAIL_REGISTER: "false"
-      CMD_ALLOW_ORIGIN: "localhost,geotribu.fr"
+      # CMD_ALLOW_ORIGIN: "127.0.0.1,geotribu.fr"
       CMD_ALLOW_PDF_EXPORT: "false"
       # CMD_CSP_ENABLE: "true"
-      CMD_DB_URL: "postgres://{{ pad_pguser }}:{{ pad_pgpass }}@localhost:5432/{{ pad_db }}"
+      CMD_DB_URL: "postgres://{{ pad_pguser }}:{{ pad_pgpass }}@172.17.0.1:5432/{{ pad_db }}"
       CMD_DEFAULT_PERMISSION: limited
       CMD_DEFAULT_USE_HARD_BREAK: "false"
       CMD_DOMAIN: "{{ pad_subdomain }}.{{ hostname }}"
@@ -95,11 +98,12 @@
       CMD_LOGLEVEL: "debug"
       # CMD_PATH: "/var/run/hedgedoc.sock"
       CMD_PORT: "3000"
-      CMD_URL_ADDPORT: "false" # external port
+      CMD_URL_ADDPORT: "false" # external port, because you access the instance using the default HTTPS port.
       # CMD_USECDN: "false"
-      CMD_PROTOCOL_USESSL: "true" # will be done by nginx
+      CMD_PROTOCOL_USESSL: "true" # will be done by reverse proxy
       CMD_IMAGE_UPLOAD_TYPE: filesystem
-      # CMD_SESSION_SECRET: "yipi8901csq"
+      CMD_SESSION_SECRET: "yipi8901csq"
+
 # Configuration Apache2 (reverse proxy)
 - name: Active les modules Apache
   community.general.apache2_module:

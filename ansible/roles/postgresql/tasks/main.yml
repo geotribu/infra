@@ -1,0 +1,118 @@
+---
+# Paquets logiciels
+- name: "Installe les paquets de base"
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - software-properties-common
+    update_cache: true
+    state: latest
+  become: true
+
+# Configure le dépôt de PostgreSQL
+- name: Crée le dossier de destination de la clé
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/
+    state: directory
+    recurse: true
+  become: true
+
+- name: "Télécharge la clé GPG du dépôt de PostgreSQL"
+  ansible.builtin.apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    keyring: /etc/apt/trusted.gpg.d/postgresql.gpg
+    state: present
+  become: true
+
+- name: "Ajoute le dépôt de PostgreSQL"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: pgdg-{{ ansible_distribution_release }}
+  become: true
+
+- name: Installe les différents composants de PostgreSQL
+  ansible.builtin.apt:
+    name:
+      - "postgresql-{{ postgres_version }}"
+    state: latest
+    update_cache: true
+  become: true
+  notify: reload postgresql
+
+- name: Ensure geotribu user has a postgresql account
+  postgresql_user:
+    name: "geotribu"
+    role_attr_flags: NOSUPERUSER,NOCREATEROLE,NOCREATEDB,NOINHERIT,LOGIN,NOREPLICATION,NOBYPASSRLS
+  become: true
+  become_user: postgres
+# - name: Copy pg_hba.conf configuration for {{ pg_version }}
+#   template:
+#     src: pg_hba.conf
+#     dest: "/etc/postgresql/{{pg_version}}/main/pg_hba.conf"
+#   notify: reload postgresql
+
+# - meta: flush_handlers # correct pg_hba conf is needed for the end of the play
+
+# - name: Interpolate and push postgresql.conf configuration
+#   blockinfile:
+#     path: "/etc/postgresql/{{pg_version}}/main/postgresql.conf"
+#     block: |
+#       shared_buffers = {{ postgresql_shared_buffers }}MB
+#       listen_addresses = 'localhost,172.17.0.1'
+#       timezone = 'Europe/Paris'
+
+#       # following has been generated with http://pgconfigurator.cybertec.at/
+#       # Connectivity
+#       max_connections = 200
+#       superuser_reserved_connections = 3
+
+#       # Memory Settings
+#       work_mem = '64 MB'
+#       maintenance_work_mem = '520 MB'
+#       huge_pages = try   # NB! requires also activation of huge pages via kernel params, see here for more:
+#                          # https://www.postgresql.org/docs/current/static/kernel-resources.html#LINUX-HUGE-PAGES
+#       effective_cache_size = '22 GB'
+#       effective_io_concurrency = 200   # concurrent IO only really activated if OS supports posix_fadvise function
+#       random_page_cost = 1.25 # speed of random disk access relative to sequential access (1.0)
+
+#       # Monitoring
+#       shared_preload_libraries = 'pg_stat_statements'    # per statement resource usage stats
+#       track_io_timing=on        # measure exact block IO times
+#       track_functions=pl        # track execution times of pl-language procedures if any
+
+#       # Checkpointing:
+#       checkpoint_timeout  = '15 min'
+#       checkpoint_completion_target = 0.9
+#       max_wal_size = '1024 MB'
+#       min_wal_size = '512 MB'
+
+#       # WAL writing
+#       wal_compression = on
+#       wal_buffers = -1    # auto-tuned by Postgres till maximum of segment size (16MB by default)
+#       wal_writer_delay = 200ms
+#       wal_writer_flush_after = 1MB
+
+#       # Background writer
+#       bgwriter_delay = 200ms
+#       bgwriter_lru_maxpages = 100
+#       bgwriter_lru_multiplier = 2.0
+#       bgwriter_flush_after = 0
+
+#       # Parallel queries:
+#       max_worker_processes = 12
+#       max_parallel_workers_per_gather = 6
+#       max_parallel_maintenance_workers = 6
+#       max_parallel_workers = 12
+#       parallel_leader_participation = on
+
+#       # Advanced features
+
+#       enable_partitionwise_join = on
+#       enable_partitionwise_aggregate = on
+#       jit = on
+#   notify: restart postgresql

@@ -2,7 +2,7 @@
 
 L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
 
-> Voir [l'article présentant le fonctionnement sur Geotribu](https://static.geotribu.fr/contribuer/guides/image/#parcourir-les-images-sur-le-cdn-de-geotribu).
+> Voir [l'article présentant le fonctionnement sur Geotribu](https://geotribu.fr/contribuer/guides/image/#parcourir-les-images-sur-le-cdn-de-geotribu).
 
 ## Installation
 

@@ -8,7 +8,7 @@ georezo:
       ansible_host: geotribu2
       ansible_user: geotribu
 
-    geotributest:
-      ansible_host: geotribu.local
-      ansible_user: geotribu
-      # ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
+    # geotributest:
+    #   ansible_host: geotribu.local
+    #   ansible_user: geotribu
+    #   # ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"

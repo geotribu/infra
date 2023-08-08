@@ -1,0 +1,2 @@
+postgresql_shared_buffers: "{{ ansible_memtotal_mb // 6 }}"
+pg_version: 14
