@@ -10,15 +10,14 @@
   ansible.builtin.apt:
     name:
       - git
-      # Dépendances optionnelles pour Material for Mkdocs.
-      # L'ordre est important : d'abord les dépendances de build
+      # Dépendances optionnelles pour Material for Mkdocs (plugin social : https://squidfunk.github.io/mkdocs-material/setup/setting-up-social-cards/).
+      # souci avec la dépendance de libfreetype6-dev à brotli (https://forum.ubuntu-nl.org/index.php?topic=110687.0)
       - libbrotli1=1.0.9-2build6
       - libffi-dev
       - libfreetype6-dev
       - libjpeg-dev
       - libpng-dev
       - libz-dev
-      # puis les dépendances de primaires
       - libcairo2-dev
       - pngquant
     update_cache: true
