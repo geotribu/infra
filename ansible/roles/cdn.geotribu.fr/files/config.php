@@ -68,11 +68,11 @@ $datetime_format = 'd/m/Y H:i:s';
 
 // Allowed file extensions for create and rename files
 // e.g. 'txt,html,css,js'
-$allowed_file_extensions = 'apng,gif,jfif,jpg,jpeg,mp4,png,svg,webm,webp';
+$allowed_file_extensions = 'apng,csv,gif,jfif,jpg,jpeg,mp4,png,svg,webm,webp';
 
 // Allowed file extensions for upload files
 // e.g. 'gif,png,jpg,html,txt'
-$allowed_upload_extensions = 'apng,gif,jfif,jpg,jpeg,mp4,png,svg,webm,webp';
+$allowed_upload_extensions = 'apng,csv,gif,jfif,jpg,jpeg,mp4,png,svg,webm,webp';
 
 // Favicon path. This can be either a full url to an .PNG image, or a path based on the document root.
 // full path, e.g http://example.com/favicon.png
