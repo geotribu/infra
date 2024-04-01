@@ -19,7 +19,7 @@ isso_conf_file = Path(__file__).parent / "isso-prod.cfg"
 application = make_app(
     config.load(
         default=config.default_file(),
-        user=str(isso_conf_file.resolve())
+        user=str(isso_conf_file.resolve()),
         # default=os.path.join(dist.location, dist.project_name, "defaults.ini"),
         # user=str(isso_conf_file.resolve()),
     ),
