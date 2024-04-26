@@ -14,10 +14,10 @@ WSGIPythonOptimize 2
         user=geotribu \
         group=www-data \
         processes=2 \
-        threads=5 \
+        threads=15 \
         # explicit encoding. See: http://blog.dscpl.com.au/2014/09/setting-lang-and-lcall-when-using.html
-        lang='en_US.UTF-8' \
-        locale='en_US.UTF-8'
+        # lang='en_US.UTF-8' \
+        # locale='en_US.UTF-8'
     # WSGIScriptAlias / {{ comments_path }}isso_wsgi.py
 
     # HTTP/2
