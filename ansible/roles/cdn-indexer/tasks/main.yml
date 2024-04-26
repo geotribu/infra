@@ -54,7 +54,7 @@
   become_user: geotribu
 
 # Planification
-- name: Planifie l'exécution du script
+- name: Planifie l'exécution du script d'indexation des images
   ansible.builtin.cron:
     backup: true
     name: "Indexation des images du CDN"
