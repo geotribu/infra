@@ -1,2 +1,2 @@
-ansible>=9,<9.5
+ansible>=9,<9.6
 ansible-lint>=20,<24.3
