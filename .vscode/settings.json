@@ -6,11 +6,12 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.organizeImports": "explicit"
         }
     },
     "isort.args": [
         "--profile",
         "black"
-    ]
+    ],
+    "ansible.python.interpreterPath": "/home/jmo/Git/Geotribu/infra/.venv/bin/python"
 }
