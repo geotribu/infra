@@ -29,16 +29,17 @@ tar -zcf {{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz -C {{ cdn_path }} im
 FILE_SIZE=$(du --human-readable "{{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz" | cut -f1)
 
 # Move to the website repository
-cd {{ dir_website_source }}|| exit
+cd {{ dir_website_git }}|| exit
 # Update git
-git pull --ff-only --tags
+git restore .
+git pull --ff-only --prune --tags
 # disable GitHub CLI prompts
 gh config set prompt disabled
 # Create release
 gh release create "$_tomonth" {{ dir_dest_backups }}cdn/bkp_cdn_"${_today}".tar.gz --title "Sauvegarde $_tomonth" --generate-notes
 
 # Remove assets of release older than 12 months
-previous_year=$(date -d "$_today -12 months")
+# previous_year=$(date -d "$_today -12 months")
 # gh release delete-asset 2021.11 bkp_cdn_2021-11-01.tar.gz
 
 # -- Slack Notification
