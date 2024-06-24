@@ -33,13 +33,14 @@
       export MKDOCS_ENABLE_PLUGIN_GIT_COMMITTERS=true
       export MKDOCS_ENABLE_PLUGIN_GIT_DATES=true
       export MKDOCS_ENABLE_PLUGIN_PRIVACY=true
-      export MKDOCS_ENABLE_PLUGIN_RSS=true
       export MKDOCS_ENABLE_PLUGIN_SOCIAL=true
       export MKDOCS_ENABLE_PLUGIN_SOCIAL_CARDS=true
+      export MKDOCS_ENABLE_PLUGIN_RSS=true
       export MKDOCS_ENABLE_PLUGIN_TAGS=true
-      export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugin/git-committers
-      export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugin/privacy
-      export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{dir_website_cache}}plugin/social
+      export MKDOCS_ENABLE_PLUGIN_TYPESET=true
+      export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugins/git-committers
+      export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugins/privacy
+      export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{dir_website_cache}}plugins/social
       export MKDOCS_SITE_COPYRIGHT='<span class=\"copyleft\">&copy;</span> Geotribu (miroir)'
       export MKDOCS_SITE_URL=https://www2.geotribu.fr/
   become_user: geotribu
