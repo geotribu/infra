@@ -40,6 +40,7 @@
       export MKDOCS_ENABLE_PLUGIN_TYPESET=true
       export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugins/git-committers
       export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugins/privacy
+      export MKDOCS_PLUGIN_RSS_CACHE_DIR={{dir_website_cache}}plugins/rss
       export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{dir_website_cache}}plugins/social
       export MKDOCS_SITE_COPYRIGHT='<span class=\"copyleft\">&copy;</span> Geotribu (miroir)'
       export MKDOCS_SITE_URL=https://www2.geotribu.fr/
