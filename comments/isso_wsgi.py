@@ -1,7 +1,7 @@
 #! python3 # noqa: E265
 
 """
-    WSGI script to allow launch isso through Apache mod_wsgi.
+WSGI script to allow launch isso through Apache mod_wsgi.
 """
 
 import site  # noqa: E402
