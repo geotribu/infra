@@ -42,10 +42,20 @@ repos:
         types: [python]
         args: ["--ignore=E501"]
 
-  # - repo: https://github.com/ansible-community/ansible-lint.git
-  #   rev: v6.8.6
-  #   hooks:
-  #     - id: ansible-lint
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        additional_dependencies:
+          - yamllint
+
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v25.6.1
+    hooks:
+      - id: ansible-lint
+        name: Ansible Lint
+        description: Run configurations on .ansible-lint file
+        args: [-c, ./ansible/.ansible-lint.yaml, ansible]
 
 ci:
   autofix_prs: true
