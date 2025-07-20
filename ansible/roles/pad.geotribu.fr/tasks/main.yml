@@ -66,7 +66,7 @@
 - name: Launch hedgedoc container
   community.docker.docker_container:
     name: geotripad
-    image: quay.io/hedgedoc/hedgedoc:1.9.7
+    image: quay.io/hedgedoc/hedgedoc:1.10.3
     pull: false
     detach: true
     state: started
@@ -78,8 +78,6 @@
     volumes:
       - "/home/{{ pad_user_name }}/uploads:/hedgedoc/public/uploads"
       - "/home/{{ pad_user_name }}/theme/default.md:/hedgedoc/public/default.md"
-    # etc_hosts:
-    #   git.local: "{{ ansible_docker0.ipv4.address }}"
     env:
       DEBUG: "true"
       CMD_ALLOW_ANONYMOUS_EDITS: "false"
@@ -93,7 +91,6 @@
       CMD_DEFAULT_USE_HARD_BREAK: "false"
       CMD_DOMAIN: "{{ pad_subdomain }}.{{ hostname }}"
       CMD_EMAIL: "false"
-      CMD_HOST: "127.0.0.1"
       CMD_HSTS_ENABLE: "true"
       CMD_LOGLEVEL: "debug"
       # CMD_PATH: "/var/run/hedgedoc.sock"
@@ -115,6 +112,7 @@
     - proxy
     - proxy_http
     # - proxy_http2
+    - proxy_wstunnel
     - setenvif
   become: true
 - name: Copie la configuration Apache2 du pad
