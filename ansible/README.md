@@ -1,5 +1,28 @@
 # Déploiement avec Ansible
 
+## Prérequis
+
+- [ansible]()
+
+    Sur Ubuntu 24.04, c'est pratique d'installer Ansible avec [pipx](https://pipx.pypa.io/) :
+
+    > [!TIP]
+    > [pipx](https://pipx.pypa.io/stable/installation/) est l'outil moderne du groupe Python packaging de la fondation Python pour installer proprement les outils en ligne de commande en respectant les pratiques et contraintes des différents OS.  
+    > Pour l'installer sur Ubuntu :  
+    >
+    > ```sh
+    > sudo apt install pipx
+    > pipx ensurepath
+    > ```
+
+    Puis :
+
+    ```sh
+    pipx install ansible-core ansible-lint pre-commit
+    ```
+
+- [vagrant](https://developer.hashicorp.com/vagrant/install) et [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) pour le développement local
+
 ## Installer Ansible - Exemple sur Ubuntu
 
 Créer un environnement virtuel :
