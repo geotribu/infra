@@ -16,6 +16,7 @@
     owner: geotribu
     group: geotribu
   become_user: geotribu
+  become: true
 
 - name: "Copie les fichiers liés au script dans {{ dir_cdn_indexer_scripts }}"
   ansible.builtin.copy:
@@ -23,15 +24,18 @@
     dest: "{{ dir_cdn_indexer_scripts }}"
     owner: geotribu
     group: geotribu
+    mode: preserve
   with_items:
     - files/requirements.txt
     - files/search_indexer.py
   become_user: geotribu
+  become: true
 
 - name: Copie la configuration du script
   ansible.builtin.template:
     src: "templates/images-indexer.ini.j2"
     dest: "{{ dir_cdn_indexer_scripts }}images-indexer.ini"
+    mode: preserve
   become: true
 
 - name: Crée un environnement virtuel et installe les paquets Python de base
@@ -41,10 +45,12 @@
       - pip
       - setuptools
       - wheel
-    state: latest
+  args:
+    state: present
     virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
   become_user: geotribu
+  become: true
 
 - name: Installe les paquets Python pour le script
   ansible.builtin.pip:
@@ -52,6 +58,7 @@
     requirements: requirements.txt
     virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
   become_user: geotribu
+  become: true
 
 # Planification
 - name: Planifie l'exécution du script d'indexation des images
@@ -61,3 +68,4 @@
     job: "cd {{ dir_cdn_indexer_scripts }} && {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py  > {{ dir_cdn_indexer_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
     special_time: hourly
   become_user: geotribu
+  become: true

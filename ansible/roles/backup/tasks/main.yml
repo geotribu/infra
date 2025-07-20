@@ -20,11 +20,13 @@
 
 - name: Télécharge et ajoute la clé du dépôt dans le portefeuille
   ansible.builtin.shell: |
+    set -o pipefail
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
     sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
   become: true
   when: not gh_ppa.stat.exists
+  changed_when: true
 
 - name: "Installe le CLI GitHub"
   become: true
@@ -36,7 +38,7 @@
 - name: MAJ les paquets installés
   become: true
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     upgrade: true
 
 #  Script de sauvegarde
@@ -46,15 +48,19 @@
     state: directory
     owner: geotribu
     group: geotribu
+    mode: "0755"
   become_user: geotribu
+  become: true
 
-- name: "Crée le dossier du script de sauvegarde {{ dir_backup_scripts }}cdn"
+- name: "Crée le dossier du script de sauvegarde CDN {{ dir_backup_scripts }}"
   ansible.builtin.file:
     path: "{{ dir_backup_scripts }}"
     state: directory
     owner: geotribu
     group: geotribu
+    mode: "0755"
   become_user: geotribu
+  become: true
 
 - name: "Copie le script de sauvegarde du site + CDN dans {{ dir_backup_scripts }}"
   ansible.builtin.template:
@@ -63,6 +69,7 @@
     mode: "0775"
     backup: true
   become_user: geotribu
+  become: true
 
 - name: "Copie le fichier modèle de notification dans {{ dir_backup_scripts }}"
   ansible.builtin.copy:
@@ -71,8 +78,10 @@
     owner: geotribu
     group: geotribu
     # mode: "0775"
+    mode: preserve
     backup: true
   become_user: geotribu
+  become: true
 
 # Cible de la sauvegarde
 - name: Crée le dossier de destination pour la sauvegarde des sources du site
@@ -82,6 +91,7 @@
     recurse: true
     owner: geotribu
     group: www-data
+    mode: "0755"
   become: true
 
 - name: Clone le dépôt des sources du site Geotribu
@@ -89,9 +99,10 @@
     repo: https://github.com/geotribu/website.git
     dest: "{{ dir_website_source }}"
     depth: 1
-    single_branch: yes
+    single_branch: true
     version: master
   become_user: geotribu
+  become: true
 
 - name: Configure le dépôt local - nom d'utilisateur
   community.general.git_config:
@@ -114,3 +125,4 @@
     job: "{{ dir_backup_scripts }}geotribu-backup-site-cdn.sh > {{ dir_backup_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
     special_time: monthly
   become_user: geotribu
+  become: true

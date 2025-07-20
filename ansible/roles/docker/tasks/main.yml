@@ -87,3 +87,4 @@
     job: "docker system prune --volumes --force --all"
     special_time: monthly
   become_user: geotribu
+  become: true

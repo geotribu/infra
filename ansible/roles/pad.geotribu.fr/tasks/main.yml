@@ -49,6 +49,7 @@
     state: directory
     owner: "{{ pad_user_name }}"
     group: "{{ pad_user_name }}"
+    mode: "0755"
   become_user: "{{ pad_user_name }}"
   become: true
 
@@ -56,7 +57,7 @@
   ansible.builtin.copy:
     src: files/default.md
     dest: "/home/{{ pad_user_name }}/theme/default.md"
-    mode: 0644
+    mode: "0644"
     owner: "{{ pad_user_name }}"
     group: "{{ pad_user_name }}"
   become_user: "{{ pad_user_name }}"
@@ -99,7 +100,7 @@
       # CMD_USECDN: "false"
       CMD_PROTOCOL_USESSL: "true" # will be done by reverse proxy
       CMD_IMAGE_UPLOAD_TYPE: filesystem
-      CMD_SESSION_SECRET: "yipi8901csq"
+      CMD_SESSION_SECRET: yipi8901csq
 
 # Configuration Apache2 (reverse proxy)
 - name: Active les modules Apache
@@ -118,23 +119,25 @@
 - name: Copie la configuration Apache2 du pad
   become: true
   ansible.builtin.template:
-    src: "templates/apache_pad.conf.j2"
-    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ pad_subdomain }}.conf"
+    src: templates/apache_pad.conf.j2
+    dest: /etc/apache2/sites-available/{{ geotribu_www }}-{{ pad_subdomain }}.conf
+    mode: preserve
 
 - name: Active le site
   become: true
-  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ pad_subdomain }}"
+  ansible.builtin.command: /usr/sbin/a2ensite {{ geotribu_www }}-{{ pad_subdomain }}
+  changed_when: true
   # notify: Reload Apache
 
 # Certificat SSL
-- name: "Check si le certificat existe déjà"
+- name: Check si le certificat existe déjà
   ansible.builtin.stat:
-    path: "/etc/letsencrypt/live/{{ pad_subdomain }}.{{ hostname }}/fullchain.pem"
+    path: /etc/letsencrypt/live/{{ pad_subdomain }}.{{ hostname }}/fullchain.pem
   become: true
   register: cert_comments
 
 - name: Crée un certificat SSL pour {{ pad_subdomain }}
-  shell: >-
+  ansible.builtin.command: >-
     certbot --apache
     --noninteractive
     -d {{ pad_subdomain }}.{{ hostname }}
@@ -142,4 +145,5 @@
     --agree-tos
   become: true
   register: cert_created
+  changed_when: true
   # notify: Reload Apache

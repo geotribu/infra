@@ -30,6 +30,7 @@
     path: "{{ comments_path }}"
     state: directory
     owner: geotribu
+    mode: "0755"
   become: true
 
 - name: Copie les dépendances à Isso
@@ -39,6 +40,7 @@
     dest: "{{ comments_path }}"
     owner: geotribu
     group: www-data
+    mode: preserve
   with_items:
     - files/webhook_template_slack.json
     - files/requirements.txt
@@ -47,11 +49,13 @@
   ansible.builtin.template:
     src: "templates/isso_wsgi.py.j2"
     dest: "{{ comments_path }}isso_wsgi.py"
+    mode: preserve
 
 - name: "Copie le fichier de configuration d'Isso dans {{ comments_path }}"
   ansible.builtin.template:
     src: "templates/isso-prod.cfg.j2"
     dest: "{{ comments_path }}isso-prod.cfg"
+    mode: preserve
 
 - name: Crée un environnement virtuel et installe les paquets de base
   ansible.builtin.pip:
@@ -64,6 +68,7 @@
     virtualenv: "{{ comments_path }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
   become_user: geotribu
+  become: true
 
 - name: Installe les paquets Python pour Isso
   ansible.builtin.pip:
@@ -71,6 +76,7 @@
     requirements: requirements.txt
     virtualenv: "{{ comments_path }}.venv"
   become_user: geotribu
+  become: true
 
 - name: Recursively change ownership of a directory
   ansible.builtin.file:
@@ -79,22 +85,26 @@
     recurse: true
     owner: geotribu
     group: www-data
+    mode: "0755"
 
 - name: Copie la configuration Apache2 pour les commentaires
   ansible.builtin.template:
     src: "templates/apache_comments.conf.j2"
     dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ comments_subdomain }}.conf"
+    mode: preserve
   become: true
 
 - name: Active le site
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ comments_subdomain }}"
   become: true
   notify: Restart Apache
+  changed_when: true
 
 - name: Désactive le site par défaut d'Apache
   become: true
   ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
   notify: Restart Apache
+  changed_when: true
 
 - name: "Check si le certificat existe déjà"
   ansible.builtin.stat:
@@ -103,7 +113,7 @@
   register: cert_comments
 
 - name: Crée un certificat SSL pour {{ comments_subdomain }}
-  shell: >-
+  ansible.builtin.command: >-
     certbot --apache
     --noninteractive
     -d {{ comments_subdomain }}.{{ hostname }}
@@ -112,9 +122,10 @@
   become: true
   register: cert_created
   notify: Reload Apache
+  changed_when: true
 
 - name: "Décommente les lignes WSGI qui posent problème au certbot"
-  replace:
+  ansible.builtin.replace:
     path: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ comments_subdomain }}-le-ssl.conf"
     regexp: "^#+(.*WSGI.*)"
     replace: '\1'

@@ -1,0 +1,9 @@
+---
+profile: production
+
+warn_list:
+  - package-latest
+
+skip_list:
+  - var-naming[no-role-prefix]
+  - yaml[line-length]

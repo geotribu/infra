@@ -7,45 +7,70 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-added-large-files
-        args: ["--maxkb=500"]
+        args:
+          - --maxkb=500
       - id: check-ast
+      - id: check-builtin-literals
       - id: check-case-conflict
-      - id: check-executables-have-shebangs
-      - id: check-json
       - id: check-toml
       - id: check-yaml
-        args: [--unsafe]
+        args:
+          - --unsafe
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: fix-encoding-pragma
-        args: [--remove]
+        args:
+          - --remove
       - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
+        args:
+          - --markdown-linebreak-ext=md
 
-  - repo: https://github.com/pycqa/isort
-    rev: 6.0.1
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
     hooks:
-      - id: isort
-        args: ["--profile", "black", "--filter-files"]
+      - id: pyupgrade
+        args:
+          - "--py310-plus"
 
   - repo: https://github.com/psf/black
     rev: 25.1.0
     hooks:
       - id: black
+        args:
+          - --target-version=py310
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.11.4"
     hooks:
-      - id: flake8
-        language: python
-        types: [python]
-        args: ["--ignore=E501"]
+      - id: ruff
+        args:
+          - --fix-only
 
-  # - repo: https://github.com/ansible-community/ansible-lint.git
-  #   rev: v6.8.6
-  #   hooks:
-  #     - id: ansible-lint
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        args:
+          - --profile
+          - black
+          - --filter-files
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v25.6.1
+    hooks:
+      - id: ansible-lint
+        name: Ansible Lint
+        description: Run yamllint with configurations in .ansible-lint file
+        args:
+          - -c
+          - ./ansible/.ansible-lint.yaml
+          - ansible
 
 ci:
   autofix_prs: true
