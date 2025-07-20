@@ -3,4 +3,6 @@ roles:
   - name: galaxyproject.postgresql
 
 collections:
+  - name: community.docker
+  - name: community.general
   - name: community.postgresql

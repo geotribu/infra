@@ -2,6 +2,6 @@
 - name: Vérifie que Docker a redémarré
   become: true
   listen: restart docker daemon
-  service:
+  ansible.builtin.service:
     name: docker
     state: restarted

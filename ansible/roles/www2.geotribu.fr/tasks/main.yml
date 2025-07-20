@@ -28,6 +28,7 @@
     backup: true
     create: true
     path: /home/geotribu/.profile
+    mode: "0755"
     block: |
       export MKDOCS_ENABLE_PLUGIN_GIT_AUTHORS=true
       export MKDOCS_ENABLE_PLUGIN_GIT_COMMITTERS=true
@@ -38,12 +39,13 @@
       export MKDOCS_ENABLE_PLUGIN_RSS=true
       export MKDOCS_ENABLE_PLUGIN_TAGS=true
       export MKDOCS_ENABLE_PLUGIN_TYPESET=true
-      export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{dir_website_cache}}plugins/git-committers
-      export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{dir_website_cache}}plugins/privacy
-      export MKDOCS_PLUGIN_RSS_CACHE_DIR={{dir_website_cache}}plugins/rss
-      export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{dir_website_cache}}plugins/social
+      export MKDOCS_PLUGIN_GIT_COMMITTERS_CACHE_DIR={{ dir_website_cache }}plugins/git-committers
+      export MKDOCS_PLUGIN_PRIVACY_EXTERNAL_CACHE_DIR={{ dir_website_cache }}plugins/privacy
+      export MKDOCS_PLUGIN_RSS_CACHE_DIR={{ dir_website_cache }}plugins/rss
+      export MKDOCS_PLUGIN_SOCIAL_CACHE_DIR={{ dir_website_cache }}plugins/social
       export MKDOCS_SITE_COPYRIGHT='<span class=\"copyleft\">&copy;</span> Geotribu (miroir)'
       export MKDOCS_SITE_URL=https://www2.geotribu.fr/
+  become: true
   become_user: geotribu
 
 # Dossier cible pour le projet Git
@@ -72,8 +74,9 @@
     repo: https://github.com/geotribu/website.git
     dest: "{{ dir_website_git }}"
     force: true
-    single_branch: yes
+    single_branch: true
     version: "{{ website_main_branch }}"
+  become: true
   become_user: geotribu
 
 - name: Configure le dépôt local - nom d'utilisateur
@@ -100,6 +103,7 @@
     state: latest
     virtualenv: "{{ dir_website_git }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
+  become: true
   become_user: geotribu
 
 - name: Installe les paquets Python pour générer le site principal
@@ -107,6 +111,7 @@
     chdir: "{{ dir_website_git }}"
     requirements: requirements-insiders.txt
     virtualenv: "{{ dir_website_git }}.venv"
+  become: true
   become_user: geotribu
   environment:
     GH_TOKEN_MATERIAL_INSIDERS: "{{ token_github_material_insiders }}"
@@ -120,7 +125,9 @@
   args:
     chdir: "{{ dir_website_git }}"
     executable: /bin/bash
+  become: true
   become_user: geotribu
+  changed_when: true
 
 - name: Planifie l'exécution quotidienne de la mise à jour du dépôt
   ansible.builtin.cron:
@@ -133,10 +140,11 @@
       cd {{ dir_website_git }} &&
       {{ dir_website_git }}.venv/bin/python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
       {{ dir_website_git }}.venv/bin/python -m mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
-      echo -e "User-Agent: *\nDisallow: /\nSitemap: https://www2.geotribu.fr/sitemap.xml" > {{ dir_website_html}}robots.txt
+      echo -e "User-Agent: *\nDisallow: /\nSitemap: https://www2.geotribu.fr/sitemap.xml" > {{ dir_website_html }}robots.txt
 
     special_time: daily
     user: geotribu
+  become: true
   become_user: geotribu
 
 # Site Apache
@@ -144,11 +152,13 @@
   ansible.builtin.template:
     src: "templates/apache_www.conf.j2"
     dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ site_subdomain }}.conf"
+    mode: preserve
   become: true
 
 - name: Active le site
   become: true
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ site_subdomain }}"
+  changed_when: true
   # notify: Restart Apache
 
 - name: Crée un certificat SSL pour {{ site_subdomain }}
@@ -160,4 +170,5 @@
     --agree-tos
   become: true
   register: cert_created
+  changed_when: true
   # notify: Reload Apache

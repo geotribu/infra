@@ -29,7 +29,7 @@
       - php8.1-iconv
       - php8.1-mbstring
       - php8.1-zip
-    update_cache: yes
+    update_cache: true
 
 # Apache modules
 - name: Désactive les modules Apache
@@ -58,19 +58,21 @@
 
 - name: Active la configuration pour php8 FPM
   become: true
-  command: >
+  ansible.builtin.command: >
     a2enconf php8.1-fpm
   args:
     creates: "/etc/apache2/conf-enabled/php8.1-fpm.conf"
   when: item.state is not defined or item.state != 'absent'
   notify: Restart Apache
+  changed_when: true
 
 # Installe TinyFileManager
 - name: Crée le dossier de destination
   become: true
-  file:
+  ansible.builtin.file:
     path: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
     state: directory
+    mode: "0755"
 
 - name: Copie les fichiers de TinyFileManager
   become: true
@@ -91,19 +93,22 @@
   ansible.builtin.template:
     src: "templates/apache_cdn.conf.j2"
     dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ cdn_subdomain }}.conf"
+    mode: preserve
 
 - name: Active le site
   become: true
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ cdn_subdomain }}"
   # notify: Restart Apache
+  changed_when: true
 
 - name: Désactive le site par défaut d'Apache
   become: true
   ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
   notify: Restart Apache
+  changed_when: true
 
 - name: Crée un certificat SSL pour {{ cdn_subdomain }}
-  shell: >-
+  ansible.builtin.command: >-
     certbot --apache
     --noninteractive
     -d {{ cdn_subdomain }}.{{ hostname }}
@@ -112,3 +117,4 @@
   become: true
   register: cert_created
   notify: Reload Apache
+  changed_when: true

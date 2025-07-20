@@ -93,6 +93,8 @@
     dest: "$HOME"
     owner: geotribu
     backup: true
+    mode: preserve
   with_fileglob:
     - files/.*
   become_user: geotribu
+  become: true
