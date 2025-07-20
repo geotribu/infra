@@ -45,7 +45,7 @@
   notify: reload postgresql
 
 - name: Ensure geotribu user has a postgresql account
-  postgresql_user:
+  community.postgresql.postgresql_user:
     name: "geotribu"
     role_attr_flags: NOSUPERUSER,NOCREATEROLE,NOCREATEDB,NOINHERIT,LOGIN,NOREPLICATION,NOBYPASSRLS
   become: true

@@ -152,7 +152,7 @@
   # notify: Restart Apache
 
 - name: Crée un certificat SSL pour {{ site_subdomain }}
-  shell: >-
+  ansible.builtin.command: >-
     certbot --apache
     --noninteractive
     -d {{ site_subdomain }}.{{ hostname }}
