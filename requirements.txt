@@ -1,5 +1,4 @@
-setuptools
-wheel
+pre-commit>=4.2.0,<5
 
 -r ansible/requirements.txt
 -r comments/requirements.txt

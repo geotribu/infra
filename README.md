@@ -1,11 +1,18 @@
-# CDN minimaliste de Geotribu
+# Infra Geotribu
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/minimalist-cdn/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/minimalist-cdn/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/infra/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/infra/master)
 
-Fichiers de configuration pour <https://cdn.geotribu.fr> et des outils liés : sauvegarde, notifications, indexation...
+Fichiers de configuration et de déploiement des différents composants constituant l'infra du projet [Geotribu](https://geotribu.fr/) :
+
+- principalement le site d'hébergement des fichiers statiques (images...) <https://cdn.geotribu.fr>
+- scripts de sauvegarde
+- commentaires
+- notifications
+- indexation des contenus
 
 ## Déploiement
 
+- le serveur est gracieusement prêté par GeoRezo et hébergé chez [Altinea](https://altinea.fr/) jusqu'à l'été 2025 puis chez [Ataraxie](https://www.ataraxie.fr/)
 - OS serveur à date : Ubuntu Server 22.04
 
 ### Prérequis
@@ -17,8 +24,8 @@ Fichiers de configuration pour <https://cdn.geotribu.fr> et des outils liés : s
 
     Host geotribu
         HostName vps383.altinea.eu
-        User geotribu
         IdentityFile ~/.ssh/id_rsa_elgeopaso
+        User geotribu
     ```
 
 - Ansible : voir [le README dédié](ansible/README.md)
@@ -44,4 +51,4 @@ Voir [le README dédié](notifications/README.md).
 
 Afin de faciliter la recherche de la bonne image lors de la rédaction des contenus, un index des fichiers du CDN est réalisé avec [lunr](https://lunrjs.com/) (son implémentation Python).
 
-Voir [le README dédié](search-index/README.md).
+Voir [le script](ansible/roles/cdn-indexer/files/search_indexer.py).
