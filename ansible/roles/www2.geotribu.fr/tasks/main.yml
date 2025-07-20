@@ -115,7 +115,6 @@
 - name: Génère le site
   ansible.builtin.shell: >-
     source .venv/bin/activate &&
-    python scripts/050_mkdocs_populate_latest.py -c mkdocs.yml &&
     python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
     mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
   args:
@@ -132,7 +131,6 @@
       git -C {{ dir_website_git }} restore . &&
       git -C {{ dir_website_git }} pull --prune --rebase &&
       cd {{ dir_website_git }} &&
-      {{ dir_website_git }}.venv/bin/python scripts/050_mkdocs_populate_latest.py &&
       {{ dir_website_git }}.venv/bin/python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
       {{ dir_website_git }}.venv/bin/python -m mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
       echo -e "User-Agent: *\nDisallow: /\nSitemap: https://www2.geotribu.fr/sitemap.xml" > {{ dir_website_html}}robots.txt
