@@ -46,8 +46,6 @@ repos:
     rev: v1.37.1
     hooks:
       - id: yamllint
-        additional_dependencies:
-          - yamllint
 
   - repo: https://github.com/ansible/ansible-lint
     rev: v25.6.1
