@@ -91,10 +91,13 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "$HOME"
-    owner: geotribu
     backup: true
+    create: true
+    mode: preserve # copy has a special mode that sets the same permissions as the source file
+    owner: geotribu
     mode: preserve
   with_fileglob:
     - files/.*
+  become: true # <- Activates privilege escalation.
   become_user: geotribu
   become: true
