@@ -22,7 +22,7 @@
       tags: www, geotribu
     - role: pad.geotribu.fr
       tags: geotribu, pad
-    - role: elgeopaso.georezo.net
-      tags: elgeopaso, georezo
+    # - role: elgeopaso.georezo.net
+    #   tags: elgeopaso, georezo
     - role: backup
       tags: cdn, scripts
