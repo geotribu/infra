@@ -9,7 +9,6 @@ from math import floor
 from math import log as math_log
 from os.path import expanduser, expandvars
 from pathlib import Path
-from typing import List
 
 # 3rd party
 import imagesize
@@ -19,7 +18,7 @@ from lunr import lunr
 configuration_file: Path = Path(__file__).parent / "images-indexer.ini"
 start_folder: Path = Path.home() / "Images"
 extensions_to_index: tuple = (".gif", ".jpg", ".jpeg", ".png", ".svg", ".webp")
-images_list: List[dict] = []
+images_list: list[dict] = []
 images_dict: dict = {}
 
 # -- FUNCTIONS ---------------------------------------------------------------
@@ -43,7 +42,7 @@ def convert_octets(octets: int) -> str:
     p = pow(1024, i)
     s = round(octets / p, 2)
 
-    return "%s %s" % (s, size_name[i])
+    return "{} {}".format(s, size_name[i])
 
 
 # -- MAIN --------------------------------------------------------------------
