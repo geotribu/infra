@@ -1,6 +1,6 @@
 ---
 # Paquets logiciels
-- name: "Installe les paquets de base"
+- name: Installe les paquets de base
   ansible.builtin.apt:
     name:
       - apt-transport-https
@@ -10,7 +10,7 @@
       - lsb-release
       - software-properties-common
     update_cache: true
-    state: latest
+    state: present
   become: true
 
 # Configure le dépôt de PostgreSQL
@@ -21,16 +21,16 @@
     recurse: true
   become: true
 
-- name: "Télécharge la clé GPG du dépôt de PostgreSQL"
+- name: Télécharge la clé GPG du dépôt de PostgreSQL
   ansible.builtin.apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     keyring: /etc/apt/trusted.gpg.d/postgresql.gpg
     state: present
   become: true
 
-- name: "Ajoute le dépôt de PostgreSQL"
+- name: Ajoute le dépôt de PostgreSQL
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
     state: present
     filename: pgdg-{{ ansible_distribution_release }}
   become: true
@@ -38,15 +38,15 @@
 - name: Installe les différents composants de PostgreSQL
   ansible.builtin.apt:
     name:
-      - "postgresql-{{ postgres_version }}"
-    state: latest
+      - postgresql-{{ postgres_version }}
+    state: present
     update_cache: true
   become: true
   notify: reload postgresql
 
 - name: Ensure geotribu user has a postgresql account
   community.postgresql.postgresql_user:
-    name: "geotribu"
+    name: geotribu
     role_attr_flags: NOSUPERUSER,NOCREATEROLE,NOCREATEDB,NOINHERIT,LOGIN,NOREPLICATION,NOBYPASSRLS
   become: true
   become_user: postgres

@@ -2,10 +2,10 @@
 # Installe Git
 - name: Ajoute le dépôt de Git
   ansible.builtin.apt_repository:
-    repo: "ppa:git-core/ppa"
+    repo: ppa:git-core/ppa
   become: true
 
-- name: "Installe les paquets de base"
+- name: Installe les paquets de base
   become: true
   ansible.builtin.apt:
     name:
@@ -100,7 +100,7 @@
       - pip
       - setuptools
       - wheel
-    state: latest
+    state: present
     virtualenv: "{{ dir_website_git }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
   become: true
@@ -132,7 +132,7 @@
 - name: Planifie l'exécution quotidienne de la mise à jour du dépôt
   ansible.builtin.cron:
     backup: true
-    name: "MAJ quotidienne du site miroir"
+    name: MAJ quotidienne du site miroir
     job: >
       . $HOME/.profile ;
       git -C {{ dir_website_git }} restore . &&
@@ -150,14 +150,14 @@
 # Site Apache
 - name: Copie la configuration Apache2 du CDN
   ansible.builtin.template:
-    src: "templates/apache_www.conf.j2"
-    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ site_subdomain }}.conf"
+    src: templates/apache_www.conf.j2
+    dest: /etc/apache2/sites-available/{{ geotribu_www }}-{{ site_subdomain }}.conf
     mode: preserve
   become: true
 
 - name: Active le site
   become: true
-  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ site_subdomain }}"
+  ansible.builtin.command: /usr/sbin/a2ensite {{ geotribu_www }}-{{ site_subdomain }}
   changed_when: true
   # notify: Restart Apache
 

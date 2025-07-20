@@ -45,7 +45,8 @@
       - pip
       - setuptools
       - wheel
-    state: latest
+  args:
+    state: present
     virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
   become_user: geotribu
