@@ -1,4 +1,5 @@
-Vagrant.require_version ">= 1.8.0"
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -11,7 +12,13 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/jammy64"
+  config.vm.box = "cloud-image/ubuntu-24.04"
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  config.vm.box_check_update = true
+  config.vm.box_version = "20250704.0.0"
+
   config.vm.define "vm_geotributest"
   # Allow hosts to reach this vm by hostname
   # Note: libnss-mdns must be installed on host
@@ -19,28 +26,41 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = 'geotribu.local'
 
   config.vm.network "private_network", type: "dhcp"
-  config.vm.provision "allow_guest_host_resolution",
-    type: "shell",
-    inline: 'apt-get install -y avahi-daemon libnss-mdns'
 
+  # For libvirt provider
+  #config.vagrant.plugins = "vagrant-libvirt"
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.cpus = 2
+    libvirt.driver = "kvm"
+    libvirt.memory = 4096
+    libvirt.uri = 'qemu:///system'
+
+    #libvirt.socket = '/var/run/libvirt/libvirt-sock'
+    #libvirt.host = 'localhost'
+    #libvirt.username = ''
+    #libvirt.password = ''
+    #libvirt.id_ssh_key_file = "$HOME/.ssh/id_rsa"
+  end
+
+  
   # Disable the new default behavior introduced in Vagrant 1.7, to
   # ensure that all Vagrant machines will use the same SSH key pair.
   # See https://github.com/mitchellh/vagrant/issues/5005
   config.ssh.insert_key = false
-
-  config.vm.provision "ansible" do |ansible|
+  
+  config.vm.provision 'ansible', type: 'ansible' do |ansible|
     ansible.groups = {
       "geotributest" => ["vm_geotributest"],
     }
     ansible.host_key_checking = false
     ansible.limit          = "geotributest"
-    # ansible.inventory_path = "inventory.yml"
-    ansible.playbook = "playbook.yml"
-    ansible.verbose = 'v'
     ansible.extra_vars = {
       hostname: config.vm.hostname
     }
-
+    ansible.playbook = "playbook.yml"
+    ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_ARGS']) if ENV['ANSIBLE_ARGS']
+    ansible.verbose = 'v'
+    
   end
 
 end
