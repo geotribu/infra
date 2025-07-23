@@ -13,7 +13,9 @@ Fichiers de configuration et de déploiement des différents composants constitu
 ## Déploiement
 
 - le serveur est gracieusement prêté par GeoRezo et hébergé chez [Altinea](https://altinea.fr/) jusqu'à l'été 2025 puis chez [Ataraxie](https://www.ataraxie.fr/)
-- OS serveur à date : Ubuntu Server 22.04
+- OS serveur à date :
+  - ancien serveur Altinea : Ubuntu Server 22.04
+  - nouveau serveur Ataraxie : Ubuntu Server 24.04
 
 ### Prérequis
 
@@ -22,10 +24,22 @@ Fichiers de configuration et de déploiement des différents composants constitu
     ```config
     IdentitiesOnly yes
 
-    Host geotribu
+    Host geotribu-old
         HostName vps383.altinea.eu
         IdentityFile ~/.ssh/id_rsa_elgeopaso
         User geotribu
+    ```
+
+    Pour le nouveau serveur :
+
+    ```config
+    IdentitiesOnly yes
+
+    Host geotribu
+        ForwardAgent yes
+        HostName 91.230.235.162
+        IdentityFile ~/.ssh/id_rsa_elgeopaso
+        User ubuntu
     ```
 
 - Ansible : voir [le README dédié](ansible/README.md)
