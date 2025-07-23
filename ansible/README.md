@@ -3,7 +3,26 @@
 ## Prérequis
 
 - [ansible](https://docs.ansible.com/ansible/latest/index.html)
-- [vagrant](https://developer.hashicorp.com/vagrant/install) et [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) pour le développement local
+
+### Développement local
+
+- [vagrant](https://developer.hashicorp.com/vagrant/install) et les paquets liés :
+  - [libvirt](https://libvirt.org/) pour gérer les machines virtuelles :
+
+    ```sh
+    sudo apt install libvirt-daemon-system libvirt-dev
+    sudo adduser $USER libvirt
+    ```
+
+  - le plugin libvirt de Vagrant :  
+
+    ```sh
+    vagrant plugin install vagrant-libvirt
+    ```
+
+- [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) comme provider
+
+Penser à  se reloguer pour que les changements de groupe prennent effet.
 
 ## Installer Ansible
 
