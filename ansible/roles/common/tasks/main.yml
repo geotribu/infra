@@ -9,12 +9,13 @@
   ansible.builtin.apt:
     name:
       - acl # évite les erreurs https://docs.ansible.com/ansible/latest/user_guide/become.html#resolving-temporary-file-error-messsages
-      - fail2ban
-      - ntp
       - curl
-      - apt-transport-https
+      - fail2ban
+      - fzf
       - git
       - lsb-release
+      - ntp
+      - pipx
       - python3-pip
       - python3-setuptools
       - ufw
@@ -34,11 +35,6 @@
   ansible.builtin.apt:
     autoremove: true
 
-- name: "Met à jour pip"
-  ansible.builtin.pip:
-    name: pip
-    executable: pip3
-
 # Utilisateurs et groupes
 - name: "S'assure que le groupe 'geoadmins' existe"
   become: true
@@ -57,9 +53,10 @@
   ansible.builtin.user:
     append: true
     createhome: true
+    groups: geoadmins, geocontributors, sudo, www-data
     name: geotribu
     shell: /bin/bash
-    groups: geoadmins, geocontributors, sudo, www-data
+    state: present
 
 # Pare-feu
 - name: Pare-feu UFW - Autorise SSH
@@ -86,13 +83,17 @@
     proto: tcp
     state: enabled
 
+- name: Pare-feu UFW - S'assurer qu'il est activé
+  become: true
+  community.general.ufw:
+    state: enabled
+
 # Divers
 - name: Copie les fichiers de profil
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "$HOME"
+    dest: "/home/geotribu/"
     backup: true
-    create: true
     mode: preserve # copy has a special mode that sets the same permissions as the source file
     owner: geotribu
   with_fileglob:
