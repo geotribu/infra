@@ -16,7 +16,7 @@
       - apache2
       - brotli
     update_cache: true
-    state: latest
+    state: present
 
 - name: Installation des paquets liés à PHP
   become: true

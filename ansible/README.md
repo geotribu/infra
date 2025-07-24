@@ -189,6 +189,11 @@ Il est recommandé d'utiliser une VM pour tester le déploiement sans risque.
     ```
 
 - [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) comme provider
+- si Ansible a été [installé avec pipx](#avec-pipx), ajouter passlib à son environnement :
+
+    ```sh
+    pipx inject ansible-core passlib
+    ```
 
 Penser à  se reloguer pour que les changements de groupe prennent effet.
 

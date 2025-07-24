@@ -58,6 +58,21 @@
     shell: /bin/bash
     state: present
 
+- name: Ajoute la clé SSH à geotribu
+  ansible.posix.authorized_key:
+    user: geotribu
+    state: present
+    key: "{{ lookup('file', 'files/ssh_id_guts.pub') }}"
+  become: true
+
+- name: Définir un mot de passe à l'utilisateur geotribu si playbook lancé avec Vagrant
+  ansible.builtin.user:
+    name: geotribu
+    password: "{{ 'geotribu' | password_hash('sha512') }}"
+    update_password: on_create
+  when: geotribu_set_password | default(false)
+  become: true
+
 # Pare-feu
 - name: Pare-feu UFW - Autorise SSH
   community.general.ufw:
