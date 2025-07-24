@@ -4,26 +4,6 @@
 
 - [ansible](https://docs.ansible.com/ansible/latest/index.html)
 
-### Développement local
-
-- [vagrant](https://developer.hashicorp.com/vagrant/install) et les paquets liés :
-  - [libvirt](https://libvirt.org/) pour gérer les machines virtuelles :
-
-    ```sh
-    sudo apt install libvirt-daemon-system libvirt-dev
-    sudo adduser $USER libvirt
-    ```
-
-  - le plugin libvirt de Vagrant :  
-
-    ```sh
-    vagrant plugin install vagrant-libvirt
-    ```
-
-- [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) comme provider
-
-Penser à  se reloguer pour que les changements de groupe prennent effet.
-
 ## Installer Ansible
 
 > Exemples sur Ubuntu
@@ -190,8 +170,35 @@ ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_v
 
 ## Développement local
 
-Il est possible d'utiliser une VM pour tester le déploiement sans risque :
+Il est recommandé d'utiliser une VM pour tester le déploiement sans risque.
+
+### Prérequis
+
+- [vagrant](https://developer.hashicorp.com/vagrant/install) et les paquets liés :
+  - [libvirt](https://libvirt.org/) pour gérer les machines virtuelles :
+
+    ```sh
+    sudo apt install libvirt-daemon-system libvirt-dev
+    sudo adduser $USER libvirt
+    ```
+
+  - le plugin libvirt de Vagrant :  
+
+    ```sh
+    vagrant plugin install vagrant-libvirt
+    ```
+
+- [virtualbox](https://doc.ubuntu-fr.org/%20virtualbox) comme provider
+
+Penser à  se reloguer pour que les changements de groupe prennent effet.
+
+### Lancer la VM de test
 
 ```sh
+cd ansible/
 vagrant up --provision
+```
+
+```sh
+ANSIBLE_ARGS="-t base" vagrant provision vm_geotributest
 ```
