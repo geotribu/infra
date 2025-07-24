@@ -14,7 +14,6 @@
       - fzf
       - git
       - lsb-release
-      - ntp
       - pipx
       - python3-pip
       - python3-setuptools
@@ -62,8 +61,11 @@
   ansible.posix.authorized_key:
     user: geotribu
     state: present
-    key: "{{ lookup('file', 'files/ssh_id_guts.pub') }}"
+    key: "{{ lookup('file', item) }}"
   become: true
+  loop:
+    - files/ssh_id_gounux.pub
+    - files/ssh_id_guts.pub
 
 - name: Définir un mot de passe à l'utilisateur geotribu si playbook lancé avec Vagrant
   ansible.builtin.user:
