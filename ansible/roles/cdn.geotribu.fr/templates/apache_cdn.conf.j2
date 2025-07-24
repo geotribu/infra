@@ -1,6 +1,6 @@
 <VirtualHost *:{{ http_port }}>
     ServerAdmin {{ geotribu_cert_mail }}
-    ServerName {{ sub_hostname }}.{{ hostname }}
+    ServerName {{ cdn_subdomain }}.{{ hostname }}
 
     DocumentRoot /var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/
     Alias /img "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
@@ -16,7 +16,7 @@
         Protocols h2 h2c http/1.1
     </IfModule>
 
-    <Directory "/var/www/{{ geotribu_www }}/{{ sub_hostname }}/images">
+    <Directory "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images">
         Options +FollowSymLinks -Indexes
         Require method GET POST OPTIONS
     </Directory>
@@ -45,7 +45,7 @@
     Header always set Strict-Transport-Security "max-age=15552001; includeSubDomains;"
 
     # log
-    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ sub_hostname }}_error.log
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ cdn_subdomain }}_error.log
     LogLevel warn
-    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ sub_hostname }}_access.log combined
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ cdn_subdomain }}_access.log combined
 </VirtualHost>

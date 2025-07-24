@@ -15,8 +15,8 @@
     name:
       - apache2
       - brotli
-    update_cache: true
     state: present
+    update_cache: true
 
 - name: Installation des paquets liés à PHP
   become: true
@@ -29,6 +29,7 @@
       - php8.1-iconv
       - php8.1-mbstring
       - php8.1-zip
+    state: present
     update_cache: true
 
 # Apache modules

@@ -14,7 +14,7 @@ georezo_www: georezo
 
 # certificats
 georezo_cert_mail: elpaso@georezo.net
-geotribu_cert_mail: contact@geotribu.fr
+geotribu_cert_mail: facteur@geotribu.fr
 
 # sauvegarde
 dir_backup_scripts: "/home/geotribu/scripts/backup/"

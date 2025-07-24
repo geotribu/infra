@@ -16,6 +16,12 @@ georezo_www: georezo
 scripts_folder: "/home/geotribu/scripts/"
 
 # cdn
+cdn_subdomain: cdn
+cdn_path: "/var/www/geotribu/cdn/"
+
+# certificats
+georezo_cert_mail: elpaso@georezo.net
+geotribu_cert_mail: facteur@geotribu.fr
 
 # comments
 comments_subdomain: comments

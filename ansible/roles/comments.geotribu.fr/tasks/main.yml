@@ -64,7 +64,7 @@
       - pip
       - setuptools
       - wheel
-    state: latest
+    state: present
     virtualenv: "{{ comments_path }}.venv"
     virtualenv_command: /usr/bin/python3 -m venv
   become_user: geotribu
