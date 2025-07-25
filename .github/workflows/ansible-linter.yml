@@ -1,0 +1,28 @@
+name: ansible-lint Linter
+
+permissions:
+  contents: read
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+
+  build:
+
+    name: Ansible Lint # Naming the build is important to use it as a status check
+    runs-on: ubuntu-24.04
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          args: "-c ./.ansible-lint.yaml .ansible"
+          working_directory: "ansible"
+          requirements_file: "requirements.yml"
