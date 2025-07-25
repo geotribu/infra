@@ -3,8 +3,18 @@
   ansible.builtin.service:
     name: apache2
     state: reloaded
+  become: true
+  listen: "Reload apache after PAD update"
+  tags:
+    - geotribu
+    - pad
 
 - name: Restart Apache
   ansible.builtin.service:
     name: apache2
     state: restarted
+  become: true
+  listen: "Restart apache after PAD update"
+  tags:
+    - geotribu
+    - pad
