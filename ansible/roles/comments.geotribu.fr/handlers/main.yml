@@ -1,13 +1,19 @@
 ---
 # if all tasks are successfull
 - name: Reload Apache
-  become: true
   ansible.builtin.service:
     name: apache2
     state: reloaded
+  become: true
+  tags:
+    - comments
+    - geotribu
 
 - name: Restart Apache
-  become: true
   ansible.builtin.service:
     name: apache2
     state: restarted
+  become: true
+  tags:
+    - comments
+    - geotribu

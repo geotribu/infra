@@ -12,11 +12,11 @@
 - name: "Crée le dossier où stocker le script d'indexation du CDN : {{ dir_cdn_indexer_scripts }}"
   ansible.builtin.file:
     group: geotribu
-    path: "{{ dir_cdn_indexer_scripts }}"
+    mode: "0755"
     owner: geotribu
+    path: "{{ dir_cdn_indexer_scripts }}"
     recurse: true
     state: directory
-  become_user: geotribu
   become: true
 
 - name: Copie les fichiers liés au script dans {{ dir_cdn_indexer_scripts }}
@@ -25,11 +25,10 @@
     dest: "{{ dir_cdn_indexer_scripts }}"
     owner: geotribu
     group: geotribu
-    mode: preserve
+    mode: "0644"
   loop:
     - files/requirements.txt
     - files/search_indexer.py
-  become_user: geotribu
   become: true
 
 - name: Copie la configuration du script
