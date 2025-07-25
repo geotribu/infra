@@ -15,7 +15,6 @@
     recurse: true
     owner: geotribu
     group: geotribu
-    mode: "0755"
   become_user: geotribu
   become: true
 
