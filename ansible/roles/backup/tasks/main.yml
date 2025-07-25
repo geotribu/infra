@@ -3,36 +3,47 @@
 - name: Ajoute le dépôt de Git
   ansible.builtin.apt_repository:
     repo: "ppa:git-core/ppa"
+    state: present
   become: true
 
-- name: "Installe les paquets de base"
+- name: Installe les paquets de base
   become: true
   ansible.builtin.apt:
     name:
-      - curl
       - git
+      - wget
+    state: present
+    update_cache: true
 
-- name: "Check si le dépôt est déjà présent"
+- name: Check si le dépôt est déjà présent
   ansible.builtin.stat:
     path: "/etc/apt/sources.list.d/github-cli.list"
   become: true
   register: gh_ppa
 
-- name: Télécharge et ajoute la clé du dépôt dans le portefeuille # noqa: command-instead-of-module # noqa: risky-shell-pipe
-  ansible.builtin.shell: |
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+- name: Télécharge la clé GPG GitHub CLI
+  ansible.builtin.get_url:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    dest: /usr/share/keyrings/githubcli-archive-keyring.gpg
+    mode: "0644"
   become: true
   when: not gh_ppa.stat.exists
-  changed_when: true
 
-- name: "Installe le CLI GitHub"
+- name: Ajoute le dépôt GitHub CLI dans apt sources
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ ansible_architecture }} signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    filename: github-cli
+    state: present
   become: true
+  when: not gh_ppa.stat.exists
+
+- name: Installe le CLI GitHub
   ansible.builtin.apt:
     name:
       - gh
+    state: present
     update_cache: true
+  become: true
 
 - name: MAJ les paquets installés
   become: true
