@@ -197,6 +197,13 @@ Il est recommandé d'utiliser une VM pour tester le déploiement sans risque.
 
 Penser à  se reloguer pour que les changements de groupe prennent effet.
 
+> [!TIP]
+> Il peut y avoir des conflits entre les modules du noyau de VirtualBox et ceux de KVM. Pour éviter ces conflits, il est recommandé de décharger le module `kvm_intel` avant de lancer Vagrant (valable tout le temps de la session utilisateur). Exemple pour les processeurs Intel :
+>
+> ```sh
+> sudo modprobe -r kvm_intel
+> ```
+
 ### Lancer la VM de test
 
 ```sh

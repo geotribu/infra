@@ -108,7 +108,7 @@
   notify: Restart Apache
   changed_when: true
 
-- name: Crée un certificat SSL pour {{ cdn_subdomain }}
+- name: Crée un certificat SSL avec Let's Encrypt (prod) pour {{ cdn_subdomain }}
   ansible.builtin.command: >-
     certbot --apache
     --noninteractive
@@ -119,3 +119,33 @@
   register: cert_created
   notify: Reload Apache
   changed_when: true
+  when: letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - Génère une clé privée si elle n’existe pas déjà
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/{{ cdn_subdomain }}.key
+    size: 4096
+    type: RSA
+  become: true
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/ssl/private/{{ cdn_subdomain }}.key
+    common_name: cdn_geotribu_local
+    organization_name: Geotribu
+    subject_alt_name:
+      - "DNS:{{ hostname }}"
+      - "DNS:{{ cdn_subdomain }}.{{ hostname }}"
+  become: true
+  register: csr
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat auto-signé - Génère le certificat pour {{ cdn_subdomain }}
+  community.crypto.x509_certificate:
+    csr_content: "{{ csr.csr }}"
+    path: "/etc/ssl/certs/{{ cdn_subdomain }}.crt"
+    privatekey_path: /etc/ssl/private/{{ cdn_subdomain }}.key
+    provider: selfsigned
+  become: true
+  when: not letsencrypt_enabled | default(false)

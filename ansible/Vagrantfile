@@ -58,7 +58,8 @@ Vagrant.configure("2") do |config|
     ansible.limit          = "geotributest"
     ansible.extra_vars = {
       geotribu_set_password: true,
-      hostname: config.vm.hostname
+      hostname: config.vm.hostname,
+      letsencrypt_enabled: false
     }
     ansible.playbook = "playbook.yml"
     ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_ARGS']) if ENV['ANSIBLE_ARGS']
