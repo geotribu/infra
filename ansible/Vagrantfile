@@ -43,12 +43,12 @@ Vagrant.configure("2") do |config|
     #libvirt.id_ssh_key_file = "$HOME/.ssh/id_rsa"
   end
 
-  
+
   # Disable the new default behavior introduced in Vagrant 1.7, to
   # ensure that all Vagrant machines will use the same SSH key pair.
   # See https://github.com/mitchellh/vagrant/issues/5005
   config.ssh.insert_key = false
-  
+
   config.vm.provision 'ansible', type: 'ansible' do |ansible|
     ansible.compatibility_mode = "2.0"
     ansible.groups = {
@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "playbook.yml"
     ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_ARGS']) if ENV['ANSIBLE_ARGS']
     ansible.verbose = 'v'
-    
+
   end
 
 end
