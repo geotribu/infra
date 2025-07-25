@@ -227,6 +227,9 @@ images_uploader/*.log.*
 
 ### Ansible ###
 *.retry
+.password_file
 password_file
 comments/__pycache__/__init__.cpython-310.pyc
 *.lock
+.ansible/
+.ansible-vault.pass

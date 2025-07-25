@@ -136,10 +136,10 @@ elgeopaso2204              : ok=3    changed=0    unreachable=0    failed=0    s
 ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass
 ```
 
-Ou si le mot de passe du vault est dans le fichier `password_file` :
+Ou si le mot de passe du vault est dans le fichier `.ansible-vault.pass` :
 
 ```sh
-ansible-playbook -i inventory.yml playbook.yml --vault-password-file password_file
+ansible-playbook -i inventory.yml playbook.yml --vault-password-file .ansible-vault.pass
 ```
 
 ### Gestion des secrets
@@ -148,13 +148,13 @@ Les mots de passe et autres données sensibles sont chiffrées à l'aide de l'ut
 
 Il est possible de stocker le mot de passe maître à différents endroits :
 
-- dans un fichier `password_file` qui ne sera **jamais** envoyé ou ajouté à Git
+- dans un fichier `.ansible-vault.pass` qui ne sera **jamais** envoyé ou ajouté à Git
 
 #### Créer un nouveau secret
 
 Pour ajouter un nouveau secret (mot de passe, token, etc.) qu'on appelle ici `mon_token_secret` :
 
-1. Exécuter : `ansible-vault encrypt_string --vault-id default@password_file --stdin-name 'mon_token_secret'`
+1. Exécuter : `ansible-vault encrypt_string --vault-id default@.ansible-vault.pass --stdin-name 'mon_token_secret'`
 1. Entrer la valeur du secret dans le prompt qui s'ouvre (fermer avec `Ctrl` + `d`)
 1. Copier/coller le résultat dans le fichier de variables souhaité. Par exemple : `host_vars/elgeopaso2204.yml`
 
@@ -163,7 +163,7 @@ Pour ajouter un nouveau secret (mot de passe, token, etc.) qu'on appelle ici `mo
 Pour accéder à un mot de passe dans le vault :
 
 ```sh
-ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_vars/elgeopaso2204.yml" --vault-password-file password_file
+ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_vars/elgeopaso2204.yml" --vault-password-file .ansible-vault.pass
 ```
 
 ----
@@ -212,5 +212,12 @@ vagrant up --provision
 ```
 
 ```sh
-ANSIBLE_ARGS="-t base" vagrant provision vm_geotributest
+ANSIBLE_ARGS="--vault-password-file .ansible-vault.pass -t base" vagrant provision vm_geotributest
+```
+
+Il peut-être nécessaire de redémarrer la machine virtuelle pour prendre en compte les changements (ajout de l'utilisateur à des groupes, etc.) :
+
+```sh
+vagrant halt
+vagrant up
 ```

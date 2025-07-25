@@ -52,17 +52,17 @@
     upgrade: true
 
 #  Script de sauvegarde
-- name: "Crée le dossier de destination des sauvegarde {{ dir_dest_backups }}"
+- name: Crée le dossier de destination des sauvegardes du CDN {{ dir_dest_backups }}
   ansible.builtin.file:
-    path: "{{ dir_dest_backups }}cdn"
-    state: directory
-    owner: geotribu
     group: geotribu
     mode: "0755"
+    owner: geotribu
+    path: "{{ [dir_dest_backups, 'cdn'] | path_join }}"
+    state: directory
   become_user: geotribu
   become: true
 
-- name: "Crée le dossier du script de sauvegarde CDN {{ dir_backup_scripts }}"
+- name: Crée le dossier du script de sauvegarde CDN {{ dir_backup_scripts }}
   ansible.builtin.file:
     path: "{{ dir_backup_scripts }}"
     state: directory
@@ -72,16 +72,16 @@
   become_user: geotribu
   become: true
 
-- name: "Copie le script de sauvegarde du site + CDN dans {{ dir_backup_scripts }}"
+- name: Copie le script de sauvegarde du site + CDN dans {{ dir_backup_scripts }}
   ansible.builtin.template:
-    src: "templates/geotribu-backup-site-cdn.sh.j2"
-    dest: "{{ dir_backup_scripts }}geotribu-backup-site-cdn.sh"
-    mode: "0775"
     backup: true
+    dest: "{{ [dir_backup_scripts, 'geotribu-backup-site-cdn.sh'] | path_join }}"
+    mode: "0775"
+    src: "templates/geotribu-backup-site-cdn.sh.j2"
   become_user: geotribu
   become: true
 
-- name: "Copie le fichier modèle de notification dans {{ dir_backup_scripts }}"
+- name: Copie le fichier modèle de notification dans {{ dir_backup_scripts }}
   ansible.builtin.copy:
     src: "files/tpl_slack_webhook_backup.json"
     dest: "{{ dir_backup_scripts }}"
@@ -109,10 +109,17 @@
     repo: https://github.com/geotribu/website.git
     dest: "{{ dir_website_source }}"
     depth: 1
+    force: true
     single_branch: true
+    update: true
     version: master
   become_user: geotribu
   become: true
+
+- name: Vérifie la présence du dépôt Git
+  ansible.builtin.stat:
+    path: "{{ dir_website_source }}/.git"
+  register: website_git_repo
 
 - name: Configure le dépôt local - nom d'utilisateur
   community.general.git_config:
@@ -120,6 +127,8 @@
     repo: "{{ dir_website_source }}"
     name: user.name
     value: Geotribu
+  become: true
+  become_user: geotribu
 
 - name: Configure le dépôt local - email
   community.general.git_config:
@@ -127,12 +136,18 @@
     repo: "{{ dir_website_source }}"
     name: user.email
     value: geotribu@gmail.com
+  become: true
+  become_user: geotribu
 
 - name: Planifie l'exécution mensuelle du script
   ansible.builtin.cron:
     backup: true
     name: "Sauvegarde Geotribu - Site et CDN"
-    job: "{{ dir_backup_scripts }}geotribu-backup-site-cdn.sh > {{ dir_backup_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
+    job: >
+      {{ dir_backup_scripts }}geotribu-backup-site-cdn.sh >
+      {{ dir_backup_scripts }}/$(date +\%Y\%m\%d\%H\%M\%S)-cron.log 2>&1
     special_time: monthly
+    state: present
+    user: geotribu
   become_user: geotribu
   become: true
