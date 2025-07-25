@@ -29,6 +29,9 @@ geotribu_cert_mail: facteur@geotribu.fr
 # comments
 comments_subdomain: comments
 
+# indexation
+dir_cdn_indexer_scripts: "{{ scripts_folder }}cdn/indexer/"
+
 # pad
 pad_user_name: geotripad
 pad_pguser: geotripad
