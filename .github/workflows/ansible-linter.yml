@@ -23,6 +23,5 @@ jobs:
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
-          args: "-c ./.ansible-lint.yaml .ansible"
-          working_directory: "ansible"
-          requirements_file: "requirements.yml"
+          args: "-c ./ansible/.ansible-lint.yaml ansible"
+          requirements_file: "ansible/requirements.yml"
