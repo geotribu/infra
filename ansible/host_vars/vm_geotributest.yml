@@ -19,15 +19,15 @@ scripts_folder: "/home/geotribu/scripts/"
 cdn_subdomain: cdn
 cdn_path: "/var/www/geotribu/cdn/"
 
-# indexation
-dir_cdn_indexer_scripts: "/home/geotribu/scripts/cdn/indexer/"
-
 # certificats
 georezo_cert_mail: elpaso@georezo.net
 geotribu_cert_mail: facteur@geotribu.fr
 
 # comments
 comments_subdomain: comments
+
+# indexation
+dir_cdn_indexer_scripts: "{{ scripts_folder }}cdn/indexer/"
 
 # pad
 pad_user_name: geotripad

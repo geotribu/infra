@@ -1,31 +1,32 @@
 ---
-- name: "Installation des paquets liés au script d'indexation"
+- name: Installation des paquets liés au script d'indexation
   ansible.builtin.apt:
     name:
       - python3
       - python3-venv
+    state: present
     update_cache: true
   become: true
 
 #  Script d'indexation des images
 - name: "Crée le dossier où stocker le script d'indexation du CDN : {{ dir_cdn_indexer_scripts }}"
   ansible.builtin.file:
-    path: "{{ dir_cdn_indexer_scripts }}"
-    state: directory
-    recurse: true
-    owner: geotribu
     group: geotribu
+    path: "{{ dir_cdn_indexer_scripts }}"
+    owner: geotribu
+    recurse: true
+    state: directory
   become_user: geotribu
   become: true
 
-- name: "Copie les fichiers liés au script dans {{ dir_cdn_indexer_scripts }}"
+- name: Copie les fichiers liés au script dans {{ dir_cdn_indexer_scripts }}
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ dir_cdn_indexer_scripts }}"
     owner: geotribu
     group: geotribu
     mode: preserve
-  with_items:
+  loop:
     - files/requirements.txt
     - files/search_indexer.py
   become_user: geotribu
@@ -56,6 +57,7 @@
   ansible.builtin.pip:
     chdir: "{{ dir_cdn_indexer_scripts }}"
     requirements: requirements.txt
+    state: present
     virtualenv: "{{ dir_cdn_indexer_scripts }}.venv"
   become_user: geotribu
   become: true
@@ -64,8 +66,12 @@
 - name: Planifie l'exécution du script d'indexation des images
   ansible.builtin.cron:
     backup: true
-    name: "Indexation des images du CDN"
-    job: "cd {{ dir_cdn_indexer_scripts }} && {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py  > {{ dir_cdn_indexer_scripts }}`date +\\%Y\\%m\\%d\\%H\\%M\\%S`-cron.log 2>&1"
+    name: Indexation des images du CDN
+    job: >
+      cd {{ dir_cdn_indexer_scripts }} &&
+      {{ dir_cdn_indexer_scripts }}.venv/bin/python {{ dir_cdn_indexer_scripts }}search_indexer.py >
+      {{ dir_cdn_indexer_scripts }}$(date +\%Y\%m\%d\%H\%M\%S)-cron.log 2>&1
     special_time: hourly
+    user: geotribu
   become_user: geotribu
   become: true
