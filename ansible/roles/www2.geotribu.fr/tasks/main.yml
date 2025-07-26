@@ -12,7 +12,7 @@
       - git
       # Dépendances optionnelles pour Material for Mkdocs (plugin social : https://squidfunk.github.io/mkdocs-material/setup/setting-up-social-cards/).
       # souci avec la dépendance de libfreetype6-dev à brotli (https://forum.ubuntu-nl.org/index.php?topic=110687.0)
-      - libbrotli1=1.0.9-2build6
+      - libbrotli1
       - libffi-dev
       - libfreetype6-dev
       - libjpeg-dev
@@ -20,15 +20,16 @@
       - libz-dev
       - libcairo2-dev
       - pngquant
+    state: present
     update_cache: true
 
 # Configuration profil utilisateur pour Mkdocs
-- name: Ajoute les variables d'environnement liées à Mkdocs au profil
+- name: Ajoute les variables d'environnement liées à Mkdocs au profil bash de l'utilisateur geotribu
   ansible.builtin.blockinfile:
     backup: true
     create: true
     path: /home/geotribu/.profile
-    mode: "0755"
+    mode: "0644"
     block: |
       export MKDOCS_ENABLE_PLUGIN_GIT_AUTHORS=true
       export MKDOCS_ENABLE_PLUGIN_GIT_COMMITTERS=true
@@ -49,13 +50,14 @@
   become_user: geotribu
 
 # Dossier cible pour le projet Git
-- name: Crée le dossier où cloner le projet Git du site
+- name: Crée le dossier de destination pour les sources du site
   ansible.builtin.file:
-    path: "{{ dir_website_git }}"
+    path: "{{ dir_website_source }}"
     state: directory
     recurse: true
     owner: geotribu
-    group: geotribu
+    group: www-data
+    mode: "0755"
   become: true
 
 # Dossier cible pour le HTML
@@ -69,59 +71,69 @@
   become: true
 
 # Clone initial du site
-- name: Clone le dépôt du site Geotribu sur la branche principale
+- name: Clone le dépôt des sources du site Geotribu
   ansible.builtin.git:
     repo: https://github.com/geotribu/website.git
-    dest: "{{ dir_website_git }}"
+    dest: "{{ dir_website_source }}"
+    depth: 1
     force: true
     single_branch: true
-    version: "{{ website_main_branch }}"
-  become: true
+    update: true
+    version: master
   become_user: geotribu
+  become: true
+
+- name: Vérifie la présence du dépôt Git
+  ansible.builtin.stat:
+    path: "{{ dir_website_source }}/.git"
+  register: website_git_repo
 
 - name: Configure le dépôt local - nom d'utilisateur
   community.general.git_config:
     scope: local
-    repo: "{{ dir_website_git }}"
+    repo: "{{ dir_website_source }}"
     name: user.name
     value: Geotribu
+  become: true
+  become_user: geotribu
 
 - name: Configure le dépôt local - email
   community.general.git_config:
     scope: local
-    repo: "{{ dir_website_git }}"
+    repo: "{{ dir_website_source }}"
     name: user.email
     value: geotribu@gmail.com
+  become: true
+  become_user: geotribu
 
-- name: Crée un environnement virtuel et installe les paquets de base
+- name: Installe les paquets Python de base dans virtualenv
   ansible.builtin.pip:
-    chdir: "{{ dir_website_git }}"
     name:
       - pip
       - setuptools
       - wheel
-    state: present
-    virtualenv: "{{ dir_website_git }}.venv"
+    virtualenv: "{{ [dir_website_git, '.venv'] | path_join }}"
     virtualenv_command: /usr/bin/python3 -m venv
+    state: present
+    chdir: "{{ dir_website_git }}"
   become: true
   become_user: geotribu
 
 - name: Installe les paquets Python pour générer le site principal
   ansible.builtin.pip:
     chdir: "{{ dir_website_git }}"
-    requirements: requirements-insiders.txt
+    requirements: requirements-free.txt
     virtualenv: "{{ dir_website_git }}.venv"
   become: true
   become_user: geotribu
-  environment:
-    GH_TOKEN_MATERIAL_INSIDERS: "{{ token_github_material_insiders }}"
 
 # Génère le site
 - name: Génère le site
   ansible.builtin.shell: >-
     source .venv/bin/activate &&
-    python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
-    mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+    git restore . &&
+    python scripts/100_mkdocs_config_merger.py -c mkdocs-free.yml &&
+    mkdocs build --config-file mkdocs-free.yml --site-dir {{ dir_website_html }}
   args:
     chdir: "{{ dir_website_git }}"
     executable: /bin/bash
@@ -136,12 +148,11 @@
     job: >
       . $HOME/.profile ;
       git -C {{ dir_website_git }} restore . &&
-      git -C {{ dir_website_git }} pull --prune --rebase &&
+      git -C {{ dir_website_git }} pull --force --prune --rebase &&
       cd {{ dir_website_git }} &&
-      {{ dir_website_git }}.venv/bin/python scripts/100_mkdocs_config_merger.py -c mkdocs.yml &&
-      {{ dir_website_git }}.venv/bin/python -m mkdocs build --strict --config-file mkdocs.yml --site-dir {{ dir_website_html }}
+      {{ dir_website_git }}.venv/bin/python scripts/100_mkdocs_config_merger.py -c mkdocs-free.yml &&
+      {{ dir_website_git }}.venv/bin/python -m mkdocs build --config-file mkdocs-free.yml --site-dir {{ dir_website_html }}
       echo -e "User-Agent: *\nDisallow: /\nSitemap: https://www2.geotribu.fr/sitemap.xml" > {{ dir_website_html }}robots.txt
-
     special_time: daily
     user: geotribu
   become: true
@@ -151,24 +162,54 @@
 - name: Copie la configuration Apache2 du CDN
   ansible.builtin.template:
     src: templates/apache_www.conf.j2
-    dest: /etc/apache2/sites-available/{{ geotribu_www }}-{{ site_subdomain }}.conf
+    dest: /etc/apache2/sites-available/{{ geotribu_www }}-{{ website_mirror_subdomain }}.conf
     mode: preserve
   become: true
 
 - name: Active le site
   become: true
-  ansible.builtin.command: /usr/sbin/a2ensite {{ geotribu_www }}-{{ site_subdomain }}
+  ansible.builtin.command: /usr/sbin/a2ensite {{ geotribu_www }}-{{ website_mirror_subdomain }}
   changed_when: true
-  # notify: Restart Apache
+  notify: Restart Apache
 
-- name: Crée un certificat SSL pour {{ site_subdomain }}
+- name: Crée un certificat SSL avec Let's Encrypt (prod) pour {{ website_mirror_subdomain }}
   ansible.builtin.command: >-
     certbot --apache
     --noninteractive
-    -d {{ site_subdomain }}.{{ hostname }}
+    -d {{ website_mirror_subdomain }}.{{ hostname }}
     --email {{ geotribu_cert_mail }}
     --agree-tos
   become: true
   register: cert_created
+  notify: Reload Apache
   changed_when: true
-  # notify: Reload Apache
+  when: letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - Génère une clé privée si elle n’existe pas déjà
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/{{ website_mirror_subdomain }}.key
+    size: 4096
+    type: RSA
+  become: true
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/ssl/private/{{ website_mirror_subdomain }}.key
+    common_name: cdn_geotribu_local
+    organization_name: Geotribu
+    subject_alt_name:
+      - "DNS:{{ hostname }}"
+      - "DNS:{{ website_mirror_subdomain }}.{{ hostname }}"
+  become: true
+  register: csr
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat auto-signé - Génère le certificat pour {{ website_mirror_subdomain }}
+  community.crypto.x509_certificate:
+    csr_content: "{{ csr.csr }}"
+    path: "/etc/ssl/certs/{{ website_mirror_subdomain }}.crt"
+    privatekey_path: /etc/ssl/private/{{ website_mirror_subdomain }}.key
+    provider: selfsigned
+  become: true
+  when: not letsencrypt_enabled | default(false)

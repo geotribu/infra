@@ -51,3 +51,9 @@ webhook_url_backup: !vault |
   36623566303730353531393165303438633834343931653931656534363439366234653037303136
   65363232373731313162313632396539333139626136393639626566313162623631646239633831
   3163
+
+# Site miroir
+dir_website_cache: "/home/geotribu/.cache/geotribu/website/"
+dir_website_html: "/var/www/geotribu/website/mirror/"
+website_main_branch: master
+website_mirror_subdomain: "www2"

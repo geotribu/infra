@@ -1,6 +1,6 @@
 <VirtualHost *:{{ http_port }}>
     ServerAdmin {{ geotribu_cert_mail }}
-    ServerName {{ site_subdomain }}.{{ hostname }}
+    ServerName {{ website_mirror_subdomain }}.{{ hostname }}
 
     DocumentRoot {{ dir_website_html }}
 
@@ -41,7 +41,7 @@
     Header always set Strict-Transport-Security "max-age=15552001; includeSubDomains;"
 
     # log
-    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ site_subdomain }}_error.log
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ website_mirror_subdomain }}_error.log
     LogLevel warn
-    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ site_subdomain }}_access.log combined
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ website_mirror_subdomain }}_access.log combined
 </VirtualHost>
