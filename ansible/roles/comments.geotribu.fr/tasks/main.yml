@@ -7,11 +7,11 @@
       - build-essential
       - libapache2-mod-wsgi-py3
       - libexpat1
-      - python3
+      - python3-dev
       - python3-venv
       - software-properties-common
       - sqlite3
-    update_cache: true
+    state: present
   become: true
 
 - name: Active les modules Apache
@@ -41,21 +41,37 @@
     owner: geotribu
     group: www-data
     mode: preserve
-  with_items:
+  loop:
     - files/webhook_template_slack.json
     - files/requirements.txt
 
-- name: "Copie le script WSGI pour exposer Isso sur Apache dans {{ comments_path }}"
-  ansible.builtin.template:
-    src: "templates/isso_wsgi.py.j2"
-    dest: "{{ comments_path }}isso_wsgi.py"
-    mode: preserve
+- name: S’assure que le dossier de commentaires est accessible en écriture
+  ansible.builtin.file:
+    path: "{{ comments_path }}"
+    state: directory
+    owner: geotribu
+    group: www-data
+    mode: "0775"
+    recurse: true
+  become: true
 
-- name: "Copie le fichier de configuration d'Isso dans {{ comments_path }}"
+- name: Copie le script WSGI pour exposer Isso sur Apache
+  ansible.builtin.template:
+    src: templates/isso_wsgi.py.j2
+    dest: "{{ [comments_path, 'isso_wsgi.py'] | path_join }}"
+    owner: geotribu
+    group: www-data
+    mode: "0644"
+  become: true
+
+- name: Copie le fichier de configuration d'Isso dans {{ comments_path }}
   ansible.builtin.template:
     src: "templates/isso-prod.cfg.j2"
-    dest: "{{ comments_path }}isso-prod.cfg"
-    mode: preserve
+    dest: "{{ [comments_path, 'isso-prod.cfg'] | path_join }}"
+    owner: geotribu
+    group: www-data
+    mode: "0640"
+  become: true
 
 - name: Crée un environnement virtuel et installe les paquets de base
   ansible.builtin.pip:
@@ -86,6 +102,7 @@
     owner: geotribu
     group: www-data
     mode: "0755"
+  become: true
 
 - name: Copie la configuration Apache2 pour les commentaires
   ansible.builtin.template:
@@ -97,7 +114,6 @@
 - name: Active le site
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ comments_subdomain }}"
   become: true
-  # notify: Restart Apache
   changed_when: true
 
 - name: Désactive le site par défaut d'Apache
@@ -112,7 +128,7 @@
   become: true
   register: cert_comments
 
-- name: Crée un certificat SSL pour {{ comments_subdomain }}
+- name: Crée un certificat SSL avec Let's Encrypt (prod) pour {{ comments_subdomain }}
   ansible.builtin.command: >-
     certbot --apache
     --noninteractive
@@ -123,9 +139,49 @@
   register: cert_created
   notify: Reload Apache
   changed_when: true
+  when: letsencrypt_enabled | default(false)
 
 - name: "Décommente les lignes WSGI qui posent problème au certbot"
   ansible.builtin.replace:
     path: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ comments_subdomain }}-le-ssl.conf"
     regexp: "^#+(.*WSGI.*)"
     replace: '\1'
+  when: letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - Génère une clé privée si elle n’existe pas déjà
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/{{ comments_subdomain }}.key
+    size: 4096
+    type: RSA
+  become: true
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat autosigné - certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/ssl/private/{{ comments_subdomain }}.key
+    common_name: cdn_geotribu_local
+    organization_name: Geotribu
+    subject_alt_name:
+      - "DNS:{{ hostname }}"
+      - "DNS:{{ comments_subdomain }}.{{ hostname }}"
+  become: true
+  register: csr
+  when: not letsencrypt_enabled | default(false)
+
+- name: Certificat auto-signé - Génère le certificat pour {{ comments_subdomain }}
+  community.crypto.x509_certificate:
+    csr_content: "{{ csr.csr }}"
+    path: "/etc/ssl/certs/{{ comments_subdomain }}.crt"
+    privatekey_path: /etc/ssl/private/{{ comments_subdomain }}.key
+    provider: selfsigned
+  become: true
+  when: not letsencrypt_enabled | default(false)
+
+- name: Désinstalle le paquet python3-dev
+  # utile uniquement pour la compilation de certains paquets Python : github.com/isso-comments/isso/issues/1040
+  ansible.builtin.apt:
+    name: python3-dev
+    autoclean: true
+    autoremove: true
+    state: absent
+  become: true
