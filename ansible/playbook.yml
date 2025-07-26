@@ -19,7 +19,7 @@
     - role: comments.geotribu.fr
       tags: comments, geotribu
     - role: www2.geotribu.fr
-      tags: www, geotribu
+      tags: www, geotribu, miroir
     - role: pad.geotribu.fr
       tags: geotribu, pad
     # - role: elgeopaso.georezo.net
