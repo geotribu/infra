@@ -64,7 +64,7 @@
   args:
     creates: "/etc/apache2/conf-enabled/php8.1-fpm.conf"
   when: item.state is not defined or item.state != 'absent'
-  notify: Restart Apache CDN
+  notify: Restart Apache
   changed_when: true
 
 # Installe TinyFileManager
@@ -104,7 +104,7 @@
 - name: Désactive le site par défaut d'Apache
   become: true
   ansible.builtin.command: "/usr/sbin/a2dissite 000-default.conf"
-  notify: Restart Apache CDN
+  notify: Restart Apache
   changed_when: true
 
 - name: Crée un certificat SSL avec Let's Encrypt (prod) pour {{ cdn_subdomain }}

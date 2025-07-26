@@ -1,19 +1,23 @@
 ---
 # if all tasks are successfull
-- name: Reload Apache CDN
+- name: Reload Apache
   ansible.builtin.service:
     name: apache2
     state: reloaded
   become: true
   tags:
     - cdn
+    - comments
     - geotribu
+    - miroir
 
-- name: Restart Apache CDN
+- name: Restart Apache
   ansible.builtin.service:
     name: apache2
     state: restarted
   become: true
   tags:
     - cdn
+    - comments
     - geotribu
+    - miroir
