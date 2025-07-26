@@ -176,3 +176,12 @@
     provider: selfsigned
   become: true
   when: not letsencrypt_enabled | default(false)
+
+- name: Désinstalle le paquet python3-dev
+  # utile uniquement pour la compilation de certains paquets Python : github.com/isso-comments/isso/issues/1040
+  ansible.builtin.apt:
+    name: python3-dev
+    autoclean: true
+    autoremove: true
+    state: absent
+  become: true
