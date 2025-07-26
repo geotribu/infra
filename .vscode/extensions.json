@@ -1,6 +1,11 @@
 {
     "recommendations": [
         "bbenoist.vagrant",
-        "redhat.ansible"
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "marcostazi.vs-code-vagrantfile",
+        "mikestead.dotenv",
+        "redhat.ansible",
+        "samuelcolvin.jinjahtml"
     ]
 }
