@@ -59,7 +59,6 @@
     owner: geotribu
     path: "{{ [dir_dest_backups, 'cdn'] | path_join }}"
     state: directory
-  become_user: geotribu
   become: true
 
 - name: Crée le dossier du script de sauvegarde CDN {{ dir_backup_scripts }}

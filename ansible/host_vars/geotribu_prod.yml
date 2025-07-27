@@ -19,7 +19,7 @@ geotribu_cert_mail: facteur@geotribu.fr
 
 # sauvegarde
 dir_backup_scripts: "/home/geotribu/scripts/backup/"
-dir_dest_backups: "/home/geotribu/backups/"
+dir_dest_backups: "/var/geotribu/backup/"
 dir_website_source: "/var/www/geotribu/website/sources/"
 webhook_url_backup: !vault |
   $ANSIBLE_VAULT;1.1;AES256
