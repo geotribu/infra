@@ -1,2 +1,3 @@
 gevent>=23.1,<24
-isso>=0.13,<0.14
+# isso==0.13.1.dev0
+git+https://github.com/isso-comments/isso.git@d9fadd22d584c1d1f3a9037f0411ed57ef933d56#egg=isso
