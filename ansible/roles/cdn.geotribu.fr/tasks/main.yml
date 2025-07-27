@@ -72,8 +72,10 @@
   become: true
   ansible.builtin.file:
     path: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
+    group: www-data
+    mode: "0770"
+    owner: geotribu
     state: directory
-    mode: "0755"
 
 - name: Copie les fichiers de TinyFileManager
   become: true
