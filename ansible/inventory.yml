@@ -1,8 +1,8 @@
 georezo:
   hosts:
-    elgeopaso2204:
-      ansible_host: geotribu2
-      ansible_user: geotribu
+    geotribu_prod:
+      ansible_host: geotribu
+      ansible_user: ubuntu
 
     geotributest:
       ansible_host: geotribu.local

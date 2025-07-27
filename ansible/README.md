@@ -72,7 +72,7 @@ Exécuter un ping :
 
 ```sh
 > ansible -i inventory.yml all -m ping
-elgeopaso2204 | SUCCESS => {
+geotribu_prod | SUCCESS => {
     "ansible_facts": {
         "discovered_interpreter_python": "/usr/bin/python3"
     },
@@ -92,8 +92,8 @@ elgeopaso1804 | SUCCESS => {
 Vérifier l'exécution en mode `sudo` :
 
 ```sh
-> ansible -i inventory.yml elgeopaso2204 -a "sudo -l"
-elgeopaso2204 | CHANGED | rc=0 >>
+> ansible -i inventory.yml geotribu_prod -a "sudo -l"
+geotribu_prod | CHANGED | rc=0 >>
 Matching Defaults entries for geotribu on geotribu:
     env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
 
@@ -109,37 +109,43 @@ Lancer le playbook de test :
 PLAY [Playbook de test] ***********************************************************************************************************************
 
 TASK [Gathering Facts] *********************************************************************************************************************
-Enter passphrase for key '/home/jmo/.ssh/id_rsa_elgeopaso': ok: [elgeopaso2204]
+Enter passphrase for key '/home/jmo/.ssh/id_rsa_elgeopaso': ok: [geotribu_prod]
 
 ok: [elgeopaso1804]
 
 TASK [Ping l'hôte] *************************************************************************************************************************
-ok: [elgeopaso2204]
+ok: [geotribu_prod]
 ok: [elgeopaso1804]
 
 TASK [Affiche message de base] *************************************************************************************************************
 ok: [elgeopaso1804] => {
     "msg": "Salut le serveur de GeoRezo"
 }
-ok: [elgeopaso2204] => {
+ok: [geotribu_prod] => {
     "msg": "Salut le serveur de GeoRezo"
 }
 
 PLAY RECAP *********************************************************************************************************************************
 elgeopaso1804              : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
-elgeopaso2204              : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
+geotribu_prod              : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
 ```
 
-### Lancer le playbook
+### Lancer le playbook pour la production
 
 ```sh
-ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass
+ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass -l geotribu_prod
 ```
 
 Ou si le mot de passe du vault est dans le fichier `.ansible-vault.pass` :
 
 ```sh
-ansible-playbook -i inventory.yml playbook.yml --vault-password-file .ansible-vault.pass
+ansible-playbook -i inventory.yml playbook.yml --vault-password-file .ansible-vault.pass -l geotribu_prod
+```
+
+Avec seulement certaines rôles :
+
+```sh
+ansible-playbook -i inventory.yml playbook.yml --vault-password-file .ansible-vault.pass -t cdn -l geotribu_prod -vv
 ```
 
 ### Gestion des secrets
@@ -156,14 +162,14 @@ Pour ajouter un nouveau secret (mot de passe, token, etc.) qu'on appelle ici `mo
 
 1. Exécuter : `ansible-vault encrypt_string --vault-id default@.ansible-vault.pass --stdin-name 'mon_token_secret'`
 1. Entrer la valeur du secret dans le prompt qui s'ouvre (fermer avec `Ctrl` + `d`)
-1. Copier/coller le résultat dans le fichier de variables souhaité. Par exemple : `host_vars/elgeopaso2204.yml`
+1. Copier/coller le résultat dans le fichier de variables souhaité. Par exemple : `host_vars/geotribu_prod.yml`
 
 #### Accèder à un secret
 
 Pour accéder à un mot de passe dans le vault :
 
 ```sh
-ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_vars/elgeopaso2204.yml" --vault-password-file .ansible-vault.pass
+ansible localhost -m ansible.builtin.debug -a var="mon_token_secret" -e "@host_vars/geotribu_prod.yml" --vault-password-file .ansible-vault.pass
 ```
 
 ----

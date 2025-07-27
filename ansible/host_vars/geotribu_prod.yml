@@ -1,6 +1,7 @@
 ---
 # env
 test: false
+letsencrypt_enabled: true
 vagrant: false
 
 # network
