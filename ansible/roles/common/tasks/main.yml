@@ -57,6 +57,15 @@
     shell: /bin/bash
     state: present
 
+- name: Permet à l'utilisateur geotribu d'utiliser sudo sans mot de passe
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/geotribu
+    content: "geotribu ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+  become: true
+
 - name: Ajoute la clé SSH à geotribu
   ansible.posix.authorized_key:
     user: geotribu
