@@ -121,7 +121,7 @@
 
 - name: Installe les paquets Python pour générer le site principal
   ansible.builtin.pip:
-    chdir: "{{ dir_website_git }}"
+    chdir: "{{ dir_website_source }}"
     requirements: requirements-free.txt
     virtualenv: "{{ dir_website_git }}.venv"
   become: true
