@@ -29,7 +29,7 @@ tar -zcf {{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz -C {{ cdn_path }} im
 FILE_SIZE=$(du --human-readable "{{ dir_dest_backups }}cdn/bkp_cdn_${_today}.tar.gz" | cut -f1)
 
 # Move to the website repository
-cd {{ dir_website_git }}|| exit
+cd {{ dir_website_source }}|| exit
 # Update git
 git restore .
 git pull --ff-only --prune --tags
