@@ -7,6 +7,9 @@ vagrant: true
 http_port: 80
 https_port: 443
 
+# security
+ubuntu_pro_token: fauxjetonubuntuesm
+
 # www-data
 hostname: geotribu.local
 geotribu_www: geotribu
