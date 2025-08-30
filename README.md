@@ -1,6 +1,6 @@
 # Infra Geotribu
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/infra/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/infra/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/infra/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/infra/master) [![ansible-lint Linter](https://github.com/geotribu/infra/actions/workflows/ansible-linter.yml/badge.svg)](https://github.com/geotribu/infra/actions/workflows/ansible-linter.yml)
 
 Fichiers de configuration et de déploiement des différents composants constituant l'infra du projet [Geotribu](https://geotribu.fr/) :
 
