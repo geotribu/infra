@@ -1,36 +1,23 @@
 # Infra Geotribu
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/infra/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/infra/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/geotribu/infra/master.svg)](https://results.pre-commit.ci/latest/github/geotribu/infra/master) [![ansible-lint Linter](https://github.com/geotribu/infra/actions/workflows/ansible-linter.yml/badge.svg)](https://github.com/geotribu/infra/actions/workflows/ansible-linter.yml)
 
 Fichiers de configuration et de déploiement des différents composants constituant l'infra du projet [Geotribu](https://geotribu.fr/) :
 
 - principalement le site d'hébergement des fichiers statiques (images...) <https://cdn.geotribu.fr>
 - scripts de sauvegarde
-- commentaires
+- commentaires (<https://comments.geotribu.fr/admin/>)
 - notifications
 - indexation des contenus
 
 ## Déploiement
 
-- le serveur est gracieusement prêté par GeoRezo et hébergé chez [Altinea](https://altinea.fr/) jusqu'à l'été 2025 puis chez [Ataraxie](https://www.ataraxie.fr/)
-- OS serveur à date :
-  - ancien serveur Altinea : Ubuntu Server 22.04
-  - nouveau serveur Ataraxie : Ubuntu Server 24.04
+- le serveur est gracieusement prêté par GeoRezo et hébergé chez [Ataraxie](https://www.ataraxie.fr/) depuis l'été 2025.
+- OS serveur à date (Ataraxie) : Ubuntu Server 24.04
 
 ### Prérequis
 
 - Accès SSH au serveur. Exemple de configuration SSH :
-
-    ```config
-    IdentitiesOnly yes
-
-    Host geotribu-old
-        HostName vps383.altinea.eu
-        IdentityFile ~/.ssh/id_rsa_elgeopaso
-        User geotribu
-    ```
-
-    Pour le nouveau serveur :
 
     ```config
     IdentitiesOnly yes
@@ -51,15 +38,11 @@ Fichiers de configuration et de déploiement des différents composants constitu
 
 ### Interface minimaliste de gestion des fichiers
 
-Voir [le README dédié](cdn/README.md).
+Voir [le README dédié](ansible/roles/cdn.geotribu.fr/README.md).
 
 ### Sauvegarde
 
 Voir [le README dédié](ansible/roles/backup/README.md).
-
-### Notifications
-
-Voir [le README dédié](notifications/README.md).
 
 ### Indexation des fichiers du CDN
 
