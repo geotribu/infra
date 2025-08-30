@@ -78,12 +78,6 @@ Ressources :
 
 ----
 
-### Aperçu de l'arborescence
-
-![Arborescence des scripts sur le serveur](docs/_static/img/scripts_arborescence.png "Organisation des fichiers sur le serveur")
-
-----
-
 ## Ressources
 
 - Apache 2.x
