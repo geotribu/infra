@@ -144,7 +144,7 @@
     name: "Sauvegarde Geotribu - Site et CDN"
     job: >
       {{ dir_backup_scripts }}geotribu-backup-site-cdn.sh >
-      {{ dir_backup_scripts }}/$(date +\%Y\%m\%d\%H\%M\%S)-cron.log 2>&1
+      {{ dir_backup_scripts }}$(date +\%Y\%m\%d\%H\%M\%S)-cron.log 2>&1
     special_time: monthly
     state: present
     user: geotribu
