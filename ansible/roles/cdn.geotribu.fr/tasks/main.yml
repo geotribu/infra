@@ -150,3 +150,14 @@
     provider: selfsigned
   become: true
   when: not letsencrypt_enabled | default(false)
+
+- name: Ajouter les droits sur les images fournies par le CDN
+  tags:
+    - cdn
+    - cdn-post
+  become: true
+  ansible.builtin.file:
+    path: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
+    owner: geotribu
+    group: www-data
+    mode: "0775"
