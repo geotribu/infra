@@ -32,12 +32,19 @@
     recurse: true
   become: true
 
+- name: "Vérifie si le dépôt Docker est déjà présent"
+  ansible.builtin.shell: grep -h "^deb .\+download.docker.com" /etc/apt/sources.list /etc/apt/sources.list.d/* || true
+  register: docker_repo_present
+  changed_when: false
+
 - name: "Télécharge la clé GPG du dépôt de Docker"
-  ansible.builtin.apt_key:
+  ansible.builtin.get_url:
     url: https://download.docker.com/linux/ubuntu/gpg
-    keyring: /etc/apt/keyrings/docker.gpg
-    state: present
+    dest: /etc/apt/keyrings/docker.gpg
+    mode: "0644"
+    force: true
   become: true
+  when: docker_repo_present.stdout == ""
 
 - name: "Ajoute le dépôt de Docker"
   ansible.builtin.apt_repository:
