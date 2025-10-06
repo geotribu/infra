@@ -43,6 +43,9 @@ pad_pguser: geotripad
 pad_pgpass: geotripad
 pad_db: pad
 
+# PostgreSQL
+postgres_version: 14
+
 # sauvegarde
 dir_backup_scripts: "/home/geotribu/scripts/backup/"
 dir_dest_backups: "/home/geotribu/backups/"

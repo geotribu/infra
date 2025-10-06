@@ -22,15 +22,18 @@
   become: true
 
 - name: Télécharge la clé GPG du dépôt de PostgreSQL
-  ansible.builtin.apt_key:
+  ansible.builtin.get_url:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    keyring: /etc/apt/trusted.gpg.d/postgresql.gpg
-    state: present
+    dest: /etc/apt/trusted.gpg.d/postgresql.gpg
+    mode: "0644"
   become: true
 
 - name: Ajoute le dépôt de PostgreSQL
   ansible.builtin.apt_repository:
-    repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+    repo: >
+      deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg]
+      https://apt.postgresql.org/pub/repos/apt/
+      {{ ansible_distribution_release }}-pgdg main
     state: present
     filename: pgdg-{{ ansible_distribution_release }}
   become: true
@@ -42,14 +45,23 @@
     state: present
     update_cache: true
   become: true
-  notify: reload postgresql
+  notify: Reload postgresql
 
-- name: Ensure geotribu user has a postgresql account
-  community.postgresql.postgresql_user:
-    name: geotribu
-    role_attr_flags: NOSUPERUSER,NOCREATEROLE,NOCREATEDB,NOINHERIT,LOGIN,NOREPLICATION,NOBYPASSRLS
+- name: Vérifie si l'utilisateur geotribu existe déjà
+  ansible.builtin.shell: |
+    psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='geotribu'"
   become: true
   become_user: postgres
+  register: postgresql_geotribu_user_exists
+  changed_when: false
+# - name: Crée l'utilisateur geotribu si besoin
+#   community.postgresql.postgresql_user:
+#     name: geotribu
+#     role_attr_flags: LOGIN,NOSUPERUSER,NOCREATEROLE,NOCREATEDB,NOINHERIT,NOREPLICATION,NOBYPASSRLS
+#     state: present
+#   become: true
+#   become_user: postgres
+#
 # - name: Copy pg_hba.conf configuration for {{ pg_version }}
 #   template:
 #     src: pg_hba.conf
