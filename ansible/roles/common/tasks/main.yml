@@ -118,9 +118,9 @@
 - name: Attache l’abonnement Ubuntu Pro pour activer ESM
   ansible.builtin.command: pro attach {{ ubuntu_pro_token }}
   become: true
-  register: ubuntu_pro_attach
+  register: common_ubuntu_pro_attach
   changed_when: "'is already attached' not in ubuntu_pro_attach.stdout"
-  when: ubuntu_pro_token is defined and ubuntu_pro_token != "fauxjefauxjetonubuntuesm"
+  when: ubuntu_pro_token is defined and ubuntu_pro_token != "fauxjetonubuntuesm"
 
 # Divers
 - name: Copie les fichiers de profil
