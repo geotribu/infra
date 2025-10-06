@@ -19,7 +19,7 @@
   ansible.builtin.stat:
     path: "/etc/apt/sources.list.d/github-cli.list"
   become: true
-  register: gh_ppa
+  register: backup_gh_ppa
 
 - name: Télécharge la clé GPG GitHub CLI
   ansible.builtin.get_url:
@@ -27,7 +27,7 @@
     dest: /usr/share/keyrings/githubcli-archive-keyring.gpg
     mode: "0644"
   become: true
-  when: not gh_ppa.stat.exists
+  when: not backup_gh_ppa.stat.exists
 
 - name: Ajoute le dépôt GitHub CLI dans apt sources
   ansible.builtin.apt_repository:
@@ -35,7 +35,7 @@
     filename: github-cli
     state: present
   become: true
-  when: not gh_ppa.stat.exists
+  when: not backup_gh_ppa.stat.exists
 
 - name: Installe le CLI GitHub
   ansible.builtin.apt:
