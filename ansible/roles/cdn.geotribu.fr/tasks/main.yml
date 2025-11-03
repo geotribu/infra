@@ -158,6 +158,6 @@
   become: true
   ansible.builtin.file:
     path: "/var/www/{{ geotribu_www }}/{{ cdn_subdomain }}/images/"
-    owner: geotribu
+    owner: www-data
     group: www-data
-    mode: "0775"
+    mode: "0644"
