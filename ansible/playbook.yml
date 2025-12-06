@@ -1,4 +1,4 @@
-- name: Déploiement de la stack El Geo Paso et Geotribu
+- name: Déploiement de la stack Geotribu
   hosts: all
   roles:
     - role: common
