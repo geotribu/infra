@@ -17,17 +17,38 @@ Fichiers de configuration et de déploiement des différents composants constitu
 
 ### Prérequis
 
-- Accès SSH au serveur. Exemple de configuration SSH :
+- Accès SSH au serveur.
+    1. Générer une clé dédiée :
 
-    ```config
-    IdentitiesOnly yes
+        ```sh
+        ssh-keygen -t ed25519 -C "Geotribu prenom.nom@mail.com" -f ~/.ssh/id_ed25519_geotribu
+        ```
 
-    Host geotribu
-        ForwardAgent yes
-        HostName 91.230.235.162
-        IdentityFile ~/.ssh/id_rsa_elgeopaso
-        User ubuntu
-    ```
+    1. Entrer un mot de passe fort pour la clé (passphrase).
+    1. Mettre sa clé publique sur le serveur (requiert l'accès par mot de passe au moins une fois) :
+
+        ```sh
+        ssh-copy-id -o PubkeyAuthentication=no -o PreferredAuthentications=password -i ~/.ssh/id_ed25519_geotribu.pub 91.230.235.162
+        ```
+
+    1. Exemple de configuration SSH :
+
+        ```config
+        IdentitiesOnly yes
+
+        Host geotribu
+            ForwardAgent yes
+            HostName 91.230.235.162
+            IdentityFile ~/.ssh/id_ed25519_geotribu
+            Preferredauthentications publickey
+            User geotribu
+        ```
+
+    1. Valider la connexion :
+
+        ```sh
+        ssh geotribu
+        ```
 
 - Ansible : voir [le README dédié](ansible/README.md)
 - Mot de passe maître pour les variables secrètes d'Ansible (voir le même README)
