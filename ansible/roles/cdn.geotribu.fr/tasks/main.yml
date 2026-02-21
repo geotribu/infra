@@ -98,7 +98,7 @@
     dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ cdn_subdomain }}.conf"
     mode: preserve
 
-- name: Active le site
+- name: Active le site {{ cdn_subdomain }}
   become: true
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ cdn_subdomain }}"
   changed_when: true
@@ -150,6 +150,79 @@
     provider: selfsigned
   become: true
   when: not letsencrypt_enabled | default(false)
+
+######################
+# FileBrowserQuantum #
+######################
+
+- name: Créé le dossier pour FileBrowserQuantum
+  become: true
+  ansible.builtin.file:
+    path: "{{ fbq_path }}"
+    owner: geotribu
+    group: www-data
+    mode: "0770"
+    state: directory
+
+- name: Créé le dossier data pour FileBrowserQuantum
+  become: true
+  ansible.builtin.file:
+    path: "{{ fbq_path }}/data"
+    owner: geotribu
+    group: www-data
+    mode: "0755"
+    state: directory
+
+- name: Déploiement de la conf FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/fbq_config.yaml.j2"
+    dest: "{{ fbq_path }}/config.yaml"
+    owner: geotribu
+    group: www-data
+    mode: "0644"
+
+- name: Déploiement du docker compose pour FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/fbq_docker-compose.yaml.j2"
+    dest: "{{ fbq_path }}/docker-compose.yaml"
+    owner: geotribu
+    group: www-data
+    mode: "0644"
+
+- name: Copie la configuration Apache2 de FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/apache_fbq.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ fbq_subdomain }}.conf"
+    mode: preserve
+
+- name: Active le site {{ fbq_subdomain }}
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ fbq_subdomain }}"
+  notify: Reload Apache
+  changed_when: true
+
+- name: Crée un certificat SSL avec Let's Encrypt (prod) pour {{ fbq_subdomain }}
+  ansible.builtin.command: >-
+    certbot --apache
+    --noninteractive
+    -d {{ fbq_subdomain }}.{{ hostname }}
+    --email {{ geotribu_cert_mail }}
+    --agree-tos
+  become: true
+  register: cert_created
+  notify: Reload Apache
+  changed_when: true
+  when: letsencrypt_enabled | default(false)
+
+- name: Démarrage de FileBrowserQuantum
+  become_user: geotribu
+  become: true
+  ansible.builtin.command: >
+    docker compose -f {{ fbq_path }}/docker-compose.yaml up -d
+  changed_when: true
 
 - name: Ajouter les droits sur les images fournies par le CDN
   tags:
