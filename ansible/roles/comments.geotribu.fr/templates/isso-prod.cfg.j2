@@ -55,9 +55,13 @@ salt = {{ comments_hash_salt }}
 algorithm = pbkdf2
 
 [markup]
-options = strikethrough, superscript, autolink
-allowed-elements =
-allowed-attributes =
+render =  mistune
+allowed-elements =  img
+allowed-attributes = align, href, src
+
+[markup.mistune]
+parameters = escape, hard_wrap
+plugins = footnotes, math, strikethrough, subscript, superscript, table, task_lists
 
 [moderation]
 enabled = true
