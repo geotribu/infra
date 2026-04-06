@@ -7,7 +7,6 @@
       - build-essential
       - libapache2-mod-wsgi-py3
       - libexpat1
-      - python3-dev
       - python3-venv
       - software-properties-common
       - sqlite3
@@ -176,12 +175,3 @@
     provider: selfsigned
   become: true
   when: not letsencrypt_enabled | default(false)
-
-- name: Désinstalle le paquet python3-dev
-  # utile uniquement pour la compilation de certains paquets Python : github.com/isso-comments/isso/issues/1040
-  ansible.builtin.apt:
-    name: python3-dev
-    autoclean: true
-    autoremove: true
-    state: absent
-  become: true
