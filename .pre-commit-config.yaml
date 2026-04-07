@@ -38,7 +38,7 @@ repos:
           - --target-version=py310
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.6"
+    rev: "v0.15.9"
     hooks:
       - id: ruff
         args:
@@ -59,7 +59,7 @@ repos:
       - id: yamllint
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.3.0
+    rev: v26.4.0
     hooks:
       - id: ansible-lint
         name: Ansible Lint
