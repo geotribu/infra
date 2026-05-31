@@ -11,6 +11,9 @@ or
 #################################################################################################################
 */
 
+// Language for Tiny File Manager
+$lang = 'fr';
+
 // Auth with login/password
 // set true/false to enable/disable it
 // Is independent from IP white- and blacklisting
