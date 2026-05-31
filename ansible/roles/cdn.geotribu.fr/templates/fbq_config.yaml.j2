@@ -1,0 +1,17 @@
+server:
+  port: 80
+  database: "data/database.db"
+  cacheDir: "tmp"
+  minSearchLength: 3
+  disablePreviews: false
+  disablePreviewResize: false
+  externalUrl: "http{% if letsencrypt_enabled | default(false) %}s{% endif %}://{{ fbq_subdomain }}.{{ hostname }}"
+  filesystem:
+    createFilePermission: "644"
+    createDirectoryPermission: "755"
+  sources:
+    - path: /home/images
+      config:
+        defaultEnabled: true
+auth:
+  adminUsername: admin

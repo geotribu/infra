@@ -64,6 +64,7 @@ repos:
       - id: ansible-lint
         name: Ansible Lint
         description: Run yamllint with configurations in .ansible-lint file
+        language_version: python3.12
         args:
           - -c
           - ./ansible/.ansible-lint.yaml
