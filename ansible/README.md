@@ -148,6 +148,16 @@ Avec seulement certaines rôles :
 ansible-playbook -i inventory.yml playbook.yml --vault-password-file .ansible-vault.pass -t cdn -l geotribu_prod -vv
 ```
 
+### Gestion des variables Ansible
+
+Ansible expose certaines caractérisques de l'hôte distant sous forme de variables évitant d'avoir à écrire en dur certains paramètres aux modules : les `ansible_facts` ([voir la documentation](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html)). Pour obtenir un JSON de toutes les variables de l'hôte :
+
+```sh
+ansible -i inventory.yml geotribu_prod -m ansible.builtin.setup > prod_facts.json
+```
+
+Consulter le fichier `prod_facts.json`.
+
 ### Gestion des secrets
 
 Les mots de passe et autres données sensibles sont chiffrées à l'aide de l'utilitaire [`ansible-vault`](https://docs.ansible.com/ansible/latest/user_guide/vault.html) via un mot de passe maître (voir avec l'admin de Geotribu).

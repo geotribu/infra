@@ -233,3 +233,4 @@ comments/__pycache__/__init__.cpython-310.pyc
 *.lock
 .ansible/
 .ansible-vault.pass
+ansible/prod_facts.json
