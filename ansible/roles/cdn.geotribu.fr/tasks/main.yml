@@ -36,13 +36,13 @@
   become: true
   ansible.builtin.apt:
     name:
-      - php8.1
-      - php8.1-common
-      - php8.1-fileinfo
-      - php8.1-fpm
-      - php8.1-iconv
-      - php8.1-mbstring
-      - php8.1-zip
+      - php8.5
+      - php8.5-common
+      - php8.5-fileinfo
+      - php8.5-fpm
+      - php8.5-iconv
+      - php8.5-mbstring
+      - php8.5-zip
     state: present
     update_cache: true
 
@@ -74,9 +74,9 @@
 - name: Active la configuration pour php8 FPM
   become: true
   ansible.builtin.command: >
-    a2enconf php8.1-fpm
+    a2enconf php8.5-fpm
   args:
-    creates: "/etc/apache2/conf-enabled/php8.1-fpm.conf"
+    creates: "/etc/apache2/conf-enabled/php8.5-fpm.conf"
   when: item.state is not defined or item.state != 'absent'
   notify: Restart Apache
   changed_when: true
