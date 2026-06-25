@@ -24,36 +24,15 @@
     state: present
   become: true
 
-# Configure le dépôt de Docker
-- name: Crée le dossier de destination de la clé
-  ansible.builtin.file:
-    path: /etc/apt/keyrings/
-    state: directory
-    recurse: true
-  become: true
-
-- name: "Vérifie si le dépôt Docker est déjà présent"
-  ansible.builtin.shell: grep -h "^deb .\+download.docker.com" /etc/apt/sources.list /etc/apt/sources.list.d/* || true
-  register: docker_repo_present
-  changed_when: false
-
-- name: "Télécharge la clé GPG du dépôt de Docker"
-  ansible.builtin.get_url:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    dest: /etc/apt/keyrings/docker.gpg
-    mode: "0644"
-    force: true
-  become: true
-  when: docker_repo_present.stdout == ""
-
 - name: "Ajoute le dépôt de Docker"
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg]
-      https://download.docker.com/linux/{{ ansible_distribution | lower }}
-      {{ ansible_distribution_release }} stable
-    state: present
-    filename: docker-{{ ansible_distribution_release }}
+  ansible.builtin.deb822_repository:
+    name: "docker-{{ ansible_distribution_release }}"
+    types: deb
+    uris: "https://download.docker.com/linux/{{ ansible_distribution | lower }}"
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: stable
+    architectures: amd64
+    signed_by: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
   become: true
 
 - name: Installe les différents composants de Docker

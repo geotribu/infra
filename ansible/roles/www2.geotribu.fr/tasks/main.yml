@@ -1,7 +1,7 @@
 ---
 # Installe Git
 - name: Ajoute le dépôt de Git
-  ansible.builtin.apt_repository:
+  ansible.builtin.deb822_repository:
     repo: ppa:git-core/ppa
   become: true
 

@@ -1,10 +1,17 @@
 ---
 # Installe le CLI GitHub
 - name: Ajoute le dépôt de Git
-  ansible.builtin.apt_repository:
-    repo: "ppa:git-core/ppa"
-    state: present
   become: true
+  ansible.builtin.deb822_repository:
+    architectures: amd64
+    components:
+      - main
+    name: git
+    signed_by: https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0xF911AB184317630C59970973E363C90F8F1B6217
+    state: present
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    types: deb
+    uris: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu/
 
 - name: Installe les paquets de base
   become: true
@@ -15,35 +22,26 @@
     state: present
     update_cache: true
 
-- name: Check si le dépôt est déjà présent
-  ansible.builtin.stat:
-    path: "/etc/apt/sources.list.d/github-cli.list"
-  become: true
-  register: backup_gh_ppa
-
-- name: Télécharge la clé GPG GitHub CLI
-  ansible.builtin.get_url:
-    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
-    dest: /usr/share/keyrings/githubcli-archive-keyring.gpg
-    mode: "0644"
-  become: true
-  when: not backup_gh_ppa.stat.exists
-
 - name: Ajoute le dépôt GitHub CLI dans apt sources
-  ansible.builtin.apt_repository:
-    repo: "deb [arch={{ ansible_architecture }} signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
-    filename: github-cli
-    state: present
   become: true
-  when: not backup_gh_ppa.stat.exists
+  ansible.builtin.deb822_repository:
+    architectures: "{{ 'amd64' if ansible_facts['ansible_architecture'] == 'x86_64' else ansible_facts['ansible_architecture'] }}"
+    components:
+      - main
+    name: github-cli
+    suites: stable
+    types: deb
+    uris: https://cli.github.com/packages
+    signed_by: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    state: present
 
 - name: Installe le CLI GitHub
+  become: true
   ansible.builtin.apt:
     name:
       - gh
     state: present
     update_cache: true
-  become: true
 
 - name: MAJ les paquets installés
   become: true
