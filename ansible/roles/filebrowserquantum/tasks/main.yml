@@ -1,5 +1,12 @@
 ---
 
+- name: Ajoute l'utilisateur geotribu au groupe docker
+  ansible.builtin.user:
+    name: geotribu
+    groups: docker
+    append: true
+  become: true
+
 - name: Créé le dossier pour FileBrowserQuantum
   become: true
   ansible.builtin.file:
