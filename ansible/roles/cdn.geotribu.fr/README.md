@@ -21,7 +21,7 @@ L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
     sudo apt install apache2 apache2-dev brotli
 
     # installation de PHP et de ses dépendances
-    sudo apt install php8.1 php8.1-common php8.1-fileinfo php8.1-fpm php8.1-iconv php8.1-mbstring php8.1-zip
+    sudo apt install php8.5 php8.5-common php8.5-fileinfo php8.5-fpm php8.5-iconv php8.5-mbstring php8.5-zip
     ```
 
 1. Configurer Apache :
@@ -35,7 +35,7 @@ L'outil utilisé est [Tiny File Manager](https://tinyfilemanager.github.io/).
     sudo a2dismod mpm_prefork
 
     # activation des configurations complémentaires
-    sudo a2enconf php8.1-fpm
+    sudo a2enconf php8.5-fpm
     ```
 
 1. Télécharger et installer [Tiny File Manager](https://tinyfilemanager.github.io/) dans `/var/www/geotribu/cdn/`.
