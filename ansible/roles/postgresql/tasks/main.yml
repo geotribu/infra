@@ -14,38 +14,16 @@
   become: true
 
 # Configure le dépôt de PostgreSQL
-- name: Crée le dossier de destination de la clé
-  ansible.builtin.file:
-    path: /etc/apt/trusted.gpg.d/
-    state: directory
-    recurse: true
-  become: true
-
-- name: Télécharge la clé GPG du dépôt de PostgreSQL
-  ansible.builtin.get_url:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    dest: /etc/apt/trusted.gpg.d/postgresql.gpg
-    mode: "0644"
-  become: true
-
 - name: Ajoute le dépôt de PostgreSQL
-  ansible.builtin.apt_repository:
-    repo: >
-      deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg]
-      https://apt.postgresql.org/pub/repos/apt/
-      {{ ansible_distribution_release }}-pgdg main
-    state: present
-    filename: pgdg-{{ ansible_distribution_release }}
+  ansible.builtin.deb822_repository:
+    name: "pgdg-{{ ansible_facts['distribution_release'] }}"
+    types: deb
+    uris: https://apt.postgresql.org/pub/repos/apt/
+    suites: "{{ ansible_facts['distribution_release'] }}-pgdg"
+    components: main
+    architectures: amd64
+    signed_by: https://www.postgresql.org/media/keys/ACCC4CF8.asc
   become: true
-
-- name: Installe les différents composants de PostgreSQL
-  ansible.builtin.apt:
-    name:
-      - postgresql-{{ postgres_version }}
-    state: present
-    update_cache: true
-  become: true
-  notify: Reload postgresql
 
 - name: Vérifie si l'utilisateur geotribu existe déjà
   ansible.builtin.shell: |

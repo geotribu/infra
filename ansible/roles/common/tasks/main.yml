@@ -1,11 +1,19 @@
 ---
 # Paquets logiciels
 - name: Ajoute le dépôt de Git
-  ansible.builtin.apt_repository:
-    repo: "ppa:git-core/ppa"
+  ansible.builtin.deb822_repository:
+    architectures: amd64
+    components:
+      - main
+    name: git
+    signed_by: https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0xF911AB184317630C59970973E363C90F8F1B6217
+    state: present
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    types: deb
+    uris: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu/
   become: true
 
-- name: "Installe les paquets de base"
+- name: Installe les paquets de base
   ansible.builtin.apt:
     name:
       - acl # évite les erreurs https://docs.ansible.com/ansible/latest/user_guide/become.html#resolving-temporary-file-error-messsages
