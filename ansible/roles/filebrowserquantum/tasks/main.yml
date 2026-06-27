@@ -43,6 +43,16 @@
     group: www-data
     mode: "0644"
 
+- name: Active les modules Apache pour le reverse proxy FileBrowserQuantum
+  become: true
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+  notify: Reload Apache
+
 - name: Copie la configuration Apache2 de FileBrowserQuantum
   become: true
   ansible.builtin.template:
