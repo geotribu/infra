@@ -12,7 +12,8 @@ services:
     ports:
       - 127.0.0.1:{{ fbq_internal_port }}:80
     environment:
-      - FILEBROWSER_ADMIN_PASSWORD={{ fbq_admin_password}}
+      FILEBROWSER_ADMIN_PASSWORD: {{ fbq_admin_password}}
+      FILEBROWSER_CONFIG: /home/filebrowser/config.yaml
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 60s
