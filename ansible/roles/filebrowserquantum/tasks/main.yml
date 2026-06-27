@@ -92,3 +92,11 @@
     state: present
   become: true
   become_user: geotribu
+
+- name: Attend que le service FileBrowserQuantum soit healthy
+  community.docker.docker_compose_v2:
+    project_src: "{{ fbq_path }}"
+    wait: true
+    wait_timeout: 30
+  become: true
+  become_user: geotribu
