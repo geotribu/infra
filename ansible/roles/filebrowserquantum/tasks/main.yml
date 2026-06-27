@@ -20,8 +20,8 @@
   become: true
   ansible.builtin.file:
     path: "{{ fbq_path }}/data"
-    owner: geotribu
-    group: www-data
+    owner: 1000
+    group: 1000
     mode: "0755"
     state: directory
 
