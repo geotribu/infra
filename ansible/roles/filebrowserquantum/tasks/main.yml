@@ -1,0 +1,102 @@
+---
+
+- name: Ajoute l'utilisateur geotribu au groupe docker
+  ansible.builtin.user:
+    name: geotribu
+    groups: docker
+    append: true
+  become: true
+
+- name: Créé le dossier pour FileBrowserQuantum
+  become: true
+  ansible.builtin.file:
+    path: "{{ fbq_path }}"
+    owner: geotribu
+    group: www-data
+    mode: "0770"
+    state: directory
+
+- name: Créé le dossier data pour FileBrowserQuantum
+  become: true
+  ansible.builtin.file:
+    path: "{{ fbq_path }}/data"
+    owner: 1000
+    group: 1000
+    mode: "0755"
+    state: directory
+
+- name: Déploiement de la conf FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/fbq_config.yaml.j2"
+    dest: "{{ fbq_path }}/config.yaml"
+    owner: geotribu
+    group: www-data
+    mode: "0644"
+
+- name: Déploiement du docker compose pour FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/fbq_docker-compose.yaml.j2"
+    dest: "{{ fbq_path }}/docker-compose.yaml"
+    owner: geotribu
+    group: www-data
+    mode: "0644"
+
+- name: Active les modules Apache pour le reverse proxy FileBrowserQuantum
+  become: true
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+  notify: Reload Apache
+
+- name: Copie la configuration Apache2 de FileBrowserQuantum
+  become: true
+  ansible.builtin.template:
+    src: "templates/apache_fbq.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ fbq_subdomain }}.conf"
+    mode: preserve
+
+- name: Active le site {{ fbq_subdomain }}
+  become: true
+  ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ fbq_subdomain }}"
+  notify: Reload Apache
+  changed_when: true
+
+- name: Créé un certificat SSL avec Let's Encrypt (prod) pour {{ fbq_subdomain }}
+  ansible.builtin.command: >-
+    certbot --apache
+    --noninteractive
+    -d {{ fbq_subdomain }}.{{ hostname }}
+    --email {{ geotribu_cert_mail }}
+    --agree-tos
+  become: true
+  register: cert_created
+  notify: Reload Apache
+  changed_when: true
+  when: letsencrypt_enabled | default(false)
+
+- name: Pull les images docker du compose de FileBrowserQuantum
+  community.docker.docker_compose_v2:
+    project_src: "{{ fbq_path }}"
+    pull: always
+  become: true
+  become_user: geotribu
+
+- name: Lance les services docker du compose de FileBrowserQuantum
+  community.docker.docker_compose_v2:
+    project_src: "{{ fbq_path }}"
+    state: present
+  become: true
+  become_user: geotribu
+
+- name: Attend que le service FileBrowserQuantum soit healthy
+  community.docker.docker_compose_v2:
+    project_src: "{{ fbq_path }}"
+    wait: true
+    wait_timeout: 30
+  become: true
+  become_user: geotribu
