@@ -112,7 +112,7 @@
     dest: "/etc/apache2/sites-available/{{ geotribu_www }}-{{ cdn_subdomain }}.conf"
     mode: preserve
 
-- name: Active le site
+- name: Active le site {{ cdn_subdomain }}
   become: true
   ansible.builtin.command: "/usr/sbin/a2ensite {{ geotribu_www }}-{{ cdn_subdomain }}"
   changed_when: true
