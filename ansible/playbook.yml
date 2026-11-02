@@ -12,15 +12,15 @@
     - role: postgresql
       # become: true
       tags: elgeopaso, pad, postgres
-    - role: cdn.geotribu.fr
+    - role: cdn_geotribu_fr
       tags: cdn, geotribu
-    - role: cdn-indexer
+    - role: cdn_indexer
       tags: cdn, geotribu, scripts, lunr
-    - role: comments.geotribu.fr
+    - role: comments_geotribu_fr
       tags: comments, geotribu
-    - role: www2.geotribu.fr
+    - role: www2_geotribu_fr
       tags: www, geotribu, miroir
-    - role: pad.geotribu.fr
+    - role: pad_geotribu_fr
       tags: geotribu, pad
     # - role: elgeopaso.georezo.net
     #   tags: elgeopaso, georezo
