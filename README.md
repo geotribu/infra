@@ -59,7 +59,7 @@ Fichiers de configuration et de déploiement des différents composants constitu
 
 ### Interface minimaliste de gestion des fichiers
 
-Voir [le README dédié](ansible/roles/cdn.geotribu.fr/README.md).
+Voir [le README dédié](ansible/roles/cdn_geotribu_fr/README.md).
 
 ### Sauvegarde
 
@@ -69,8 +69,8 @@ Voir [le README dédié](ansible/roles/backup/README.md).
 
 Afin de faciliter la recherche de la bonne image lors de la rédaction des contenus, un index des fichiers du CDN est réalisé avec [lunr](https://lunrjs.com/) (son implémentation Python).
 
-Voir [le script](ansible/roles/cdn-indexer/files/search_indexer.py).
+Voir [le script](ansible/roles/cdn_indexer/files/search_indexer.py).
 
 ### Commentaires
 
-Voir [le README dédié](ansible/roles/comments.geotribu.fr/README.md).
+Voir [le README dédié](ansible/roles/comments_geotribu_fr/README.md).
