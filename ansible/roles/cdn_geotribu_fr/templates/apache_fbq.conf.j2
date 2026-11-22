@@ -1,0 +1,52 @@
+{% if letsencrypt_enabled | default(false) %}
+
+# HTTP to HTTPS REDIRECT
+<VirtualHost *:{{ http_port }}>
+    ServerName {{ fbq_subdomain }}.{{ hostname }}
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+
+# HTTPS
+<VirtualHost *:{{ https_port }}>
+    ServerName {{ fbq_subdomain }}.{{ hostname }}
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/{{ fbq_subdomain }}.{{ hostname }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ fbq_subdomain }}.{{ hostname }}/privkey.pem
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+
+    <Location />
+        ProxyPass http://127.0.0.1:{{ fbq_internal_port }}/
+        ProxyPassReverse http://127.0.0.1:{{ fbq_internal_port }}/
+    </Location>
+
+    # log
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ fbq_subdomain }}_error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ fbq_subdomain }}_access.log combined
+</VirtualHost>
+
+{% else %}
+
+# HTTP ONLY (NO SSL)
+<VirtualHost *:{{ http_port }}>
+    ServerName {{ fbq_subdomain }}.{{ hostname }}
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+
+    <Location />
+        ProxyPass http://127.0.0.1:{{ fbq_internal_port }}/
+        ProxyPassReverse http://127.0.0.1:{{ fbq_internal_port }}/
+    </Location>
+
+    ErrorLog /var/log/apache2/{{ geotribu_www }}_{{ fbq_subdomain }}_error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/{{ geotribu_www }}_{{ fbq_subdomain }}_access.log combined
+</VirtualHost>
+
+{% endif %}

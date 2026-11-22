@@ -16,6 +16,10 @@
       tags: cdn, geotribu
     - role: cdn_indexer
       tags: cdn, geotribu, scripts, lunr
+    - role: geerlingguy.docker
+      become: true
+    - role: filebrowserquantum
+      tags: fbq, geotribu
     - role: comments_geotribu_fr
       tags: comments, geotribu
     - role: www2_geotribu_fr
