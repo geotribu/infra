@@ -1,0 +1,175 @@
+---
+- name: "Install required apt dependencies"
+  become: true
+  ansible.builtin.package:
+    name:
+      - certbot
+      - htop
+      - python-certbot-nginx
+    state: present
+
+# Manage linux user & groups
+- name: "Add linux user: {{ gischat_user }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    uid: "{{ gischat_user_uid }}"
+    shell: "{{ gischat_shell }}"
+
+- name: "Add linux group: {{ gischat_group }}"
+  become: true
+  ansible.builtin.group:
+    name: "{{ gischat_group }}"
+    gid: "{{ gischat_group_uid }}"
+    system: true
+
+- name: "Add linux user to group {{ gischat_user + ' > ' + gischat_group }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    groups: "{{ gischat_group }}"
+    append: true
+
+- name: "Add linux user to docker group: {{ gischat_user + ' > ' + 'docker' }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    groups: docker
+    append: true
+
+- name: "Add linux user to sudoers group: {{ gischat_user + ' > ' + 'sudo' }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    groups: sudo
+    append: true
+
+# Manage gischat deployment
+- name: "Create gischat deployment directory at {{ gischat_deploy_dir }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ gischat_deploy_dir }}"
+    state: directory
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0755"
+
+- name: "Create .backups directory for compose"
+  become: true
+  ansible.builtin.file:
+    path: "{{ gischat_deploy_dir }}/.backups"
+    state: directory
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0755"
+
+- name: "Check if compose file exists"
+  become: true
+  ansible.builtin.stat:
+    path: "{{ gischat_deploy_dir }}/docker-compose.yml"
+  register: gischat_compose_file
+
+- name: "Backup existing compose file to .backups"
+  become: true
+  ansible.builtin.copy:
+    src: "{{ gischat_deploy_dir }}/docker-compose.yml"
+    dest: "{{ gischat_deploy_dir }}/.backups/docker-compose.yml.{{ ansible_facts['date_time']['iso8601_basic_short'] }}.bak"
+    remote_src: true
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0644"
+  when: gischat_compose_file.stat.exists
+
+- name: "Deploy compose file to {{ gischat_deploy_dir }}"
+  become: true
+  ansible.builtin.template:
+    src: "docker-compose.yml.j2"
+    dest: "{{ gischat_deploy_dir }}/docker-compose.yml"
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0644"
+
+- name: "Pull new docker images from compose"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    pull: always
+
+- name: "Stop Docker Compose services"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    state: absent
+    remove_orphans: true
+    timeout: 300
+
+- name: "Start Docker Compose services"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    state: present
+
+- name: "Wait for local gischat app container to be healthy"
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ gischat_app_port }}/status"
+    status_code: 200
+    validate_certs: false
+    return_content: true
+  register: _app_health
+  until:
+    - _app_health.status == 200
+    - _app_health.health == true
+  retries: 10
+  delay: 15
+  become: false
+  changed_when: false
+  failed_when: false
+
+# Manage nginx deployment
+- name: "Install latest nginx"
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: latest
+    update_cache: true
+
+- name: "Create www log directory"
+  become: true
+  ansible.builtin.file:
+    path: "/var/log/nginx/{{ ansible_host }}"
+    owner: www-data
+    group: www-data
+    state: directory
+    mode: "0755"
+
+- name: "Remove default nginx conf in sites-enabled"
+  become: true
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: "Deploy nginx conf for gischat in sites-available"
+  become: true
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/{{ ansible_host }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "Create a symlink of the nginx conf in sites-enabled"
+  become: true
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ ansible_host }}.conf
+    dest: /etc/nginx/sites-enabled/{{ ansible_host }}.conf
+    state: link
+  notify:
+    - Validate nginx configuration
+    - Reload nginx
+
+# make sure nginx is reloaded here without errors
+- name: "Flush handlers"
+  ansible.builtin.meta: flush_handlers
