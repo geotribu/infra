@@ -1,6 +1,7 @@
 ---
 roles:
   - name: galaxyproject.postgresql
+  - name: nginxinc.nginx
 
 collections:
   - name: ansible.posix

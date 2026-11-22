@@ -1,0 +1,24 @@
+- name: "Deploy a gischat instance for QChat"
+  hosts: all
+  gather_facts: true
+  strategy: linear
+
+  pre_tasks:
+    - name: "Assert that a limit is provided"
+      ansible.builtin.assert:
+        that:
+          - ansible_limit is defined
+        fail_msg: "Using the -l or --limit option is mandatory"
+        success_msg: "Limit provided: deploying only to specified hosts"
+      run_once: true
+
+  vars:
+    # nginx branch to use for deployment from `nginx.org` repository
+    nginx_branch: stable
+
+  roles:
+    - role: geerlingguy.docker
+      become: true
+    - role: nginxinc.nginx
+      become: true
+    - role: gischat
