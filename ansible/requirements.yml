@@ -1,6 +1,7 @@
 ---
 roles:
   - name: galaxyproject.postgresql
+  - name: geerlingguy.docker
   - name: nginxinc.nginx
 
 collections:
