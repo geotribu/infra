@@ -15,5 +15,5 @@ gischat:
       ansible_host: qchat.geotribu.net
       ansible_user: gischat
     gischat_staging:
-      ansible_host: staging.qchat.geotribu.net
+      ansible_host: staging.gischat.geotribu.net
       ansible_user: gischat
