@@ -9,9 +9,20 @@ upstream gischat_upstream_{{ gischat_environment }} {
 
 server {
   listen 80;
+  listen [::]:80;
   server_name {{ ansible_host }};
-  return 301 https://$host$request_uri;
+
+  # Let's Encrypt HTTP-01 challenges (certbot --webroot), served over plain HTTP
+  location ^~ /.well-known/acme-challenge/ {
+    root {{ gischat_certbot_webroot }};
+    default_type "text/plain";
+  }
+
+  location / {
+    return 301 https://$host$request_uri;
+  }
 }
+{% if gischat_tls_enabled | bool %}
 
 server {
 
@@ -44,3 +55,4 @@ server {
     proxy_send_timeout 86400s;
   }
 }
+{% endif %}

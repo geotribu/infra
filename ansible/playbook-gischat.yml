@@ -12,6 +12,21 @@
         success_msg: "Limit provided: deploying only to specified hosts"
       run_once: true
 
+    - name: "Install apt packages"
+      become: true
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - certbot
+        - curl
+        - gpg
+        - htop
+        - python3-certbot-nginx
+
   vars:
     # nginx branch to use for deployment from `nginx.org` repository
     nginx_branch: stable

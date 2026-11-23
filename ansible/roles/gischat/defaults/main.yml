@@ -15,3 +15,15 @@ gischat_max_stored_messages: 5
 
 nginx_ssl_certificate: "/etc/letsencrypt/live/{{ ansible_host }}/fullchain.pem"
 nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ ansible_host }}/privkey.pem"
+
+# TLS / Let's Encrypt - certbot, webroot authenticator
+gischat_certbot_email: "geotribu+gischat@gmail.com"
+gischat_certbot_webroot: /var/www/letsencrypt
+# ACME directory. Staging CA (untrusted certs, for tests):
+# https://acme-staging-v02.api.letsencrypt.org/directory
+gischat_certbot_acme_server: https://acme-v02.api.letsencrypt.org/directory
+
+# Scheduled renewal (cron, server local time): every Sunday at 02:00
+gischat_certbot_renew_cron_minute: "0"
+gischat_certbot_renew_cron_hour: "2"
+gischat_certbot_renew_cron_weekday: "0"  # 0 = Sunday
