@@ -1,0 +1,10 @@
+##############################
+# Auto-generated via Ansible #
+#### Do not edit manually ####
+##############################
+
+# Shared by all gischat vhosts on this server (websocket proxying)
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  ''      close;
+}

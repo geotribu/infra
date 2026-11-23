@@ -1,0 +1,44 @@
+##############################
+# Auto-generated via Ansible #
+#### Do not edit manually ####
+##############################
+
+services:
+
+  api:
+    image: {{ gischat_docker_image }}:{{ gischat_version_tag }}
+    container_name: gischat-api-{{ gischat_environment }}
+    environment:
+      - ENVIRONMENT={{ gischat_environment }}
+      - NB_UVICORN_WORKERS={{ gischat_nb_uvicorn_workers }}
+      - CHANNELS={{ gischat_channels}}
+      - RULES={{ gischat_rules }}
+      - MAIN_LANG={{ gischat_main_lang }}
+      - MAX_IMAGE_SIZE={{ gischat_max_image_size }}
+      - MAX_GEOJSON_FEATURES={{ gischat_max_geojson_features }}
+      - MAX_STORED_MESSAGES={{ gischat_max_stored_messages | default(5) }}
+      - INSTANCE_ID={{ gischat_instance_id }}
+      - SENTRY_DSN={{ sentry_dsn }}
+      - REDIS_HOST=redis
+      - MATRIX_ENABLED={{ gischat_matrix_enabled }}
+    ports:
+      - 127.0.0.1:{{ gischat_internal_http_port }}:8000
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:{{ redis_version_tag }}
+    container_name: gischat-redis-{{ gischat_environment }}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-{{ gischat_environment }}-data:/data
+
+volumes:
+  redis-{{ gischat_environment }}-data:

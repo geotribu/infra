@@ -1,0 +1,281 @@
+---
+# Manage linux user & groups
+- name: "Add linux user to docker group: {{ gischat_user + ' > ' + 'docker' }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    groups: docker
+    append: true
+
+- name: "Add linux user to sudoers group: {{ gischat_user + ' > ' + 'sudo' }}"
+  become: true
+  ansible.builtin.user:
+    name: "{{ gischat_user }}"
+    groups: sudo
+    append: true
+
+- name: "Reset connection so new group membership is applied"
+  ansible.builtin.meta: reset_connection
+
+# Manage gischat deployment
+- name: "Create gischat deployment directory at {{ gischat_deploy_dir }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ gischat_deploy_dir }}"
+    state: directory
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0755"
+
+- name: "Create .backups directory for compose"
+  become: true
+  ansible.builtin.file:
+    path: "{{ gischat_deploy_dir }}/.backups"
+    state: directory
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0755"
+
+- name: "Check if compose file exists"
+  become: true
+  ansible.builtin.stat:
+    path: "{{ gischat_deploy_dir }}/docker-compose.yml"
+  register: gischat_compose_file
+
+- name: "Backup existing compose file to .backups"
+  become: true
+  ansible.builtin.copy:
+    src: "{{ gischat_deploy_dir }}/docker-compose.yml"
+    dest: "{{ gischat_deploy_dir }}/.backups/docker-compose.yml.{{ ansible_facts['date_time']['iso8601_basic_short'] }}.bak"
+    remote_src: true
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0644"
+  when: gischat_compose_file.stat.exists
+
+- name: "Deploy compose file to {{ gischat_deploy_dir }}"
+  become: true
+  ansible.builtin.template:
+    src: "docker-compose.yml.j2"
+    dest: "{{ gischat_deploy_dir }}/docker-compose.yml"
+    owner: "{{ gischat_user }}"
+    group: "{{ gischat_group }}"
+    mode: "0644"
+
+- name: "Pull new docker images from compose"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    pull: always
+
+- name: "Stop Docker Compose services"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    state: absent
+    remove_orphans: true
+    timeout: 300
+
+- name: "Start Docker Compose services"
+  become: true
+  become_user: "{{ gischat_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ gischat_deploy_dir }}"
+    state: present
+
+- name: "Wait for local gischat app container to be healthy"
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ gischat_internal_http_port }}/status"
+    status_code: 200
+    validate_certs: false
+    return_content: true
+  register: _app_health
+  until:
+    - _app_health.status == 200
+    - _app_health.json.status == "ok"
+    - _app_health.json.healthy == true
+  retries: 10
+  delay: 15
+  become: false
+  changed_when: false
+  failed_when: false
+
+# Manage nginx deployment
+- name: "Install latest nginx"
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: latest
+    update_cache: true
+
+- name: "Create www log directory"
+  become: true
+  ansible.builtin.file:
+    path: "/var/log/nginx/{{ ansible_host }}"
+    owner: www-data
+    group: www-data
+    state: directory
+    mode: "0755"
+
+- name: "Remove default nginx conf in sites-enabled"
+  become: true
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d/default
+    state: absent
+
+- name: "Deploy nginx websocket upgrade map"
+  become: true
+  ansible.builtin.template:
+    src: nginx-connection-upgrade.conf.j2
+    dest: /etc/nginx/conf.d/00-connection-upgrade.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Validate nginx configuration
+    - Reload nginx
+
+# Manage TLS certificate (Let's Encrypt, certbot webroot authenticator)
+- name: "Create certbot webroot directory at {{ gischat_certbot_webroot }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ gischat_certbot_webroot }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Check if a TLS certificate already exists for {{ ansible_host }}"
+  become: true
+  ansible.builtin.stat:
+    path: "{{ nginx_ssl_certificate }}"
+  register: gischat_tls_cert
+
+- name: "Enable nginx TLS server block only if certificate exists"
+  ansible.builtin.set_fact:
+    gischat_tls_enabled: "{{ gischat_tls_cert.stat.exists }}"
+
+- name: "Deploy nginx conf for gischat in conf.d"
+  become: true
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/{{ ansible_host }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Validate nginx configuration
+    - Reload nginx
+
+# nginx must serve the ACME challenge location before requesting a certificate
+- name: "Flush handlers before requesting certificate"
+  ansible.builtin.meta: flush_handlers
+
+- name: "Obtain the first TLS certificate"
+  when: not gischat_tls_enabled | bool
+  block:
+    - name: "Assert that a certbot email is provided"
+      ansible.builtin.assert:
+        that:
+          - gischat_certbot_email | length > 0
+        fail_msg: "gischat_certbot_email must be set to request a Let's Encrypt certificate"
+
+    - name: "Request TLS certificate from Let's Encrypt for {{ ansible_host }}"
+      become: true
+      ansible.builtin.command:
+        argv:
+          - certbot
+          - certonly
+          - --webroot
+          - --webroot-path
+          - "{{ gischat_certbot_webroot }}"
+          - --cert-name
+          - "{{ ansible_host }}"
+          - --domain
+          - "{{ ansible_host }}"
+          - --email
+          - "{{ gischat_certbot_email }}"
+          - --server
+          - "{{ gischat_certbot_acme_server }}"
+          - --agree-tos
+          - --no-eff-email
+          - --non-interactive
+        creates: "{{ nginx_ssl_certificate }}"
+
+    - name: "Enable nginx TLS server block"
+      ansible.builtin.set_fact:
+        gischat_tls_enabled: true
+
+    - name: "Deploy nginx conf for gischat with TLS enabled"
+      become: true
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/conf.d/{{ ansible_host }}.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Validate nginx configuration
+        - Reload nginx
+
+# Reload nginx after each successful renewal (applies to cron and certbot.timer)
+- name: "Create certbot deploy hooks directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/letsencrypt/renewal-hooks/deploy
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Deploy certbot hook reloading nginx after renewal"
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      # Auto-generated via Ansible - do not edit manually
+      set -e
+      PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      nginx -t -q
+      systemctl reload nginx
+
+- name: "Schedule weekly certificate renewal (every Sunday at 02:00)"
+  become: true
+  ansible.builtin.cron:
+    name: "certbot renew"
+    cron_file: certbot-renew-weekly
+    user: root
+    minute: "{{ gischat_certbot_renew_cron_minute }}"
+    hour: "{{ gischat_certbot_renew_cron_hour }}"
+    day: "*"
+    month: "*"
+    weekday: "{{ gischat_certbot_renew_cron_weekday }}"
+    job: "/usr/bin/certbot renew --quiet"
+    state: present
+
+# make sure nginx is reloaded here without errors
+- name: "Flush handlers"
+  ansible.builtin.meta: flush_handlers
+
+- name: "Wait for public gischat app container to be healthy"
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}/status"
+    status_code: 200
+    validate_certs: true
+    return_content: true
+  register: _app_health
+  until:
+    - _app_health.status == 200
+    - _app_health.json.status == "ok"
+    - _app_health.json.healthy == true
+  retries: 5
+  delay: 10
+  become: false
+  changed_when: false
+  failed_when: false

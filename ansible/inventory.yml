@@ -8,3 +8,12 @@ georezo:
       ansible_host: geotribu.local
       ansible_user: geotribu
       ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
+
+gischat:
+  hosts:
+    gischat_prod:
+      ansible_host: qchat.geotribu.net
+      ansible_user: gischat
+    gischat_staging:
+      ansible_host: staging.gischat.geotribu.net
+      ansible_user: gischat

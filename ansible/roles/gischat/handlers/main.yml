@@ -1,0 +1,10 @@
+- name: Validate nginx configuration
+  become: true
+  ansible.builtin.command: "nginx -t"
+  changed_when: false
+
+- name: Reload nginx
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
